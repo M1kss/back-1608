@@ -9,7 +9,7 @@ from ip_app.service import services
 from ip_app.serializers.serializers import user_model_with_token, user_model_base, credentials_model, \
     user_model_with_credentials, course_base_model, payment_link_model, cart_model, course_landing_model, \
     available_course_model, available_course_with_video_model, course_full_model, course_post_model, \
-    contacts_info_model, legal_info_model, statistics_model, course_application_model
+    contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model
 from ip_app.utils import PaginationMixin
 
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
@@ -176,6 +176,43 @@ class UserItem(Resource):
         return 200, {}
 
 
+@usr_nsp.route('/registration_init')
+class RegistrationInit(Resource):
+    """
+    First stage of user registration
+    """
+    @api.expect(first_step_registration_model)
+    @api.response(409, 'Email is used')
+    def post(self):
+        ok, reg_hash = services.create_registration_hash_and_send_email(request.get_json())
+        if not ok:
+            api.abort(409, 'Email is used')
+        return 200, {
+            'hash': reg_hash
+        }
+
+
+registration_user_parser = api.parser()
+registration_user_parser.add_argument('hash', help='Unique registration user hash')
+# TODO API for sending email with hash
+
+
+@usr_nsp.route('/check')
+class CheckUser(Resource):
+    """
+    Check user registration hash
+    """
+    @api.expect(registration_user_parser)
+    @api.marshall_with(first_step_registration_model)
+    @api.response(404, 'No user found')
+    @api.doc(security=None)
+    def get(self):
+        status, user = services.get_registration_user_by_hash(registration_user_parser.parse_args()['hash'])
+        if not status:
+            api.abort(404, 'No user found')
+        return user
+
+
 @usr_nsp.route('/current')
 class CurrentUser(Resource):
     """
@@ -192,14 +229,18 @@ class CurrentUser(Resource):
     @api.marshal_with(user_model_base)
     @api.expect(user_model_with_credentials)
     @api.response(409, 'User already exists')
+    @api.response(404, 'No user found')
     @api.doc(security=None)
     def post(self):
         """
-        Register new user
+        Register new user (second step)
         """
         ok, user = services.register_user(request.get_json())
         if not ok:
-            api.abort(409, 'User already exists')
+            if user == 'Exists':
+                api.abort(409, 'User already exists')
+            else:
+                api.abort(404, 'No user found')
         return user
 
     @api.marshal_with(user_model_base)

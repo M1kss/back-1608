@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from ip_app import session, db
-from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct
+from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct, UserRegistration
 
 
 def get_user(value, by='id'):
@@ -20,6 +20,11 @@ def get_hash(password):
     return password
 
 
+def get_registration_user_by_hash(user_hash):
+    user_reg = UserRegistration.query.filter_by(hash=user_hash).one_or_none()
+    return (True, user_reg) if user_reg else (False, {})
+
+
 def check_credentials(data):
     user = get_user(data['email'], by='email')
     if user is None:
@@ -35,11 +40,20 @@ def create_database_item(cls, data, include=None, exclude=tuple()):
 
 
 def register_user(data):
+    ok, user_reg = get_registration_user_by_hash(data['hash'])
+    if not ok:
+        return False, 'No hash'
     if get_user(data['email'], by='email'):
-        return False, {}
+        return False, 'Exists'
+    for attr in ('name', 'last_name', 'phone', 'email'):
+        if attr not in data or data[attr] is None:
+            data[attr] = getattr(user_reg, attr)
     user = create_database_item(User, data, exclude=('password', ))
     user.password_hash = get_hash(data['password'])
     session.add(user)
+    session.commit()
+
+    session.delete(user_reg)
     session.commit()
     return True, user
 
@@ -186,3 +200,14 @@ def patch_course(course_id, data):
     session.commit()
 
     return course, 200, None
+
+
+def create_registration_hash_and_send_email(data):
+    if UserRegistration.query.get(data['email']):
+        return False, ''
+    user_reg = create_database_item(UserRegistration, data)
+    user_reg.hash = generate_token()
+    session.add(user_reg)
+    session.commit()
+    # TODO: send email
+    return True, user_reg.hash

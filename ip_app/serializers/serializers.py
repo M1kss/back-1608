@@ -44,9 +44,17 @@ credentials_model = api.model('User credentials', credentials_template)
 
 short_user_model = api.model('User minimal model', {
     'user_id': fields.Integer(min=1, readonly=True),
-    'name': fields.String(min=1),
-    'last_name': fields.String(min=1),
+    'name': fields.String(min_length=1),
+    'last_name': fields.String(min_length=1),
     'profile_pic_url': fields.String,
+})
+
+first_step_registration_model = api.model('Check user model', {
+    'hash': fields.String(readonly=True),
+    'email': Email(required=True),
+    'phone': PhoneNumber,
+    'name': fields.String(min_length=1),
+    'last_name': fields.String(min_length=1),
 })
 
 user_model_base = api.clone('User model base', short_user_model, {
@@ -63,7 +71,8 @@ user_model_with_token = api.clone('User model with token', user_model_base, {
     'token': fields.String,
 })
 
-user_model_with_credentials = api.clone('Registration model', user_model_base, credentials_template)
+user_model_with_credentials = api.clone('Registration model', user_model_base, dict(credentials_template,
+                                                                                    hash=fields.String(required=True)))
 
 course_base_model = api.model('Course base model', {
     'course_id': fields.Integer(min=1, readonly=True),

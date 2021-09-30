@@ -13,6 +13,16 @@ class CourseApplication(db.Model):
     application_date = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
 
 
+class UserRegistration(db.Model):
+    __tablename__ = 'users_registration'
+    email = db.Column(db.String(30), primary_key=True)
+    hash = db.Column(db.String(36), nullable=False, unique=True)
+    date = db.Column(db.DateTime, server_default=db.func.now())
+    name = db.Column(db.String(30))
+    last_name = db.Column(db.String(30))
+    phone = db.Column(db.String(10))
+
+
 class User(db.Model):
     __tablename__ = 'users'
     user_id = db.Column(INTEGER(unsigned=True), primary_key=True)
@@ -23,7 +33,7 @@ class User(db.Model):
     last_seen = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     name = db.Column(db.String(30))
     last_name = db.Column(db.String(30))
-    token = db.Column(db.String(36))
+    token = db.Column(db.String(36), unique=True)
     profile_pic_url = db.Column(db.String(150))
     phone = db.Column(db.String(10))
     city = db.Column(db.String(30))
