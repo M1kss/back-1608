@@ -203,7 +203,7 @@ class CheckUser(Resource):
     Check user registration hash
     """
     @api.expect(registration_user_parser)
-    @api.marshall_with(first_step_registration_model)
+    @api.marshal_with(first_step_registration_model)
     @api.response(404, 'No user found')
     @api.doc(security=None)
     def get(self):
