@@ -187,7 +187,7 @@ class RegistrationInit(Resource):
         ok, reg_hash = services.create_registration_hash_and_send_email(request.get_json())
         if not ok:
             api.abort(409, 'Email is used')
-        return 200, {
+        return {
             'hash': reg_hash
         }
 
