@@ -43,8 +43,6 @@ def register_user(data):
     ok, user_reg = get_registration_user_by_hash(data['hash'])
     if not ok:
         return False, 'No hash'
-    if get_user(data['email'], by='email'):
-        return False, 'Exists'
     for attr in ('name', 'last_name', 'phone', 'email'):
         if attr not in data or data[attr] is None:
             data[attr] = getattr(user_reg, attr)
