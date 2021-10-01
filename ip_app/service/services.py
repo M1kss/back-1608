@@ -46,7 +46,7 @@ def register_user(data):
     for attr in ('name', 'last_name', 'phone', 'email'):
         if attr not in data or data[attr] is None:
             data[attr] = getattr(user_reg, attr)
-    user = create_database_item(User, data, exclude=('password', ))
+    user = create_database_item(User, data, exclude=('password', 'hash'))
     user.password_hash = get_hash(data['password'])
     session.add(user)
     session.commit()
