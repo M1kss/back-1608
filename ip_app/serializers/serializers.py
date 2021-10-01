@@ -71,8 +71,10 @@ user_model_with_token = api.clone('User model with token', user_model_base, {
     'token': fields.String,
 })
 
-user_model_with_credentials = api.clone('Registration model', user_model_base, dict(credentials_template,
-                                                                                    hash=fields.String(required=True)))
+user_model_with_credentials = api.clone('Registration model', user_model_base, {
+    'password': fields.String(required=True, min_length=6),
+    'hash': fields.String(required=True)
+    })
 
 course_base_model = api.model('Course base model', {
     'course_id': fields.Integer(min=1, readonly=True),
