@@ -201,7 +201,7 @@ def patch_course(course_id, data):
 
 
 def create_registration_hash_and_send_email(data):
-    if UserRegistration.query.get(data['email']):
+    if UserRegistration.query.get(data['email']) or get_user(data['email'], by='email'):
         return False, ''
     user_reg = create_database_item(UserRegistration, data)
     user_reg.hash = generate_token()
