@@ -11,12 +11,9 @@ class Email(fields.String):
     __schema_format__ = 'email'
     __schema_example__ = 'email@domain.com'
 
-    def validate(self, value):
-        if not value:
-            return False if self.required else True
-        if not EMAIL_REGEX.match(value):
-            return False
-        return True
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pattern = EMAIL_REGEX
 
 
 class PhoneNumber(fields.String):
@@ -24,15 +21,12 @@ class PhoneNumber(fields.String):
     Phone number string
     """
     __schema_type__ = 'string'
-    __schema_format__ = 'phone number'
+    __schema_format__ = 'phone'
     __schema_example__ = '9998887766'
 
-    def validate(self, value):
-        if not value:
-            return False if self.required else True
-        if not PHONE_REGEX.match(value):
-            return False
-        return True
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pattern = PHONE_REGEX
 
 
 credentials_template = {

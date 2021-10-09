@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from flask_restplus import Api
 
 from flask_sqlalchemy import SQLAlchemy
+from jsonschema import FormatChecker
 from sqlalchemy import MetaData
 from flask_apscheduler import APScheduler
 from flask_executor import Executor
@@ -37,7 +38,8 @@ api = Api(blueprint,
                   'description': "Type in the *'Value'* input box below: **'Bearer &lt;TOKEN&gt;'**"
               },
           },
-          security='apikey'
+          security='apikey',
+          format_checker=FormatChecker()
           )
 app.register_blueprint(blueprint)
 db = SQLAlchemy(app, metadata=MetaData(naming_convention=naming_convention))
