@@ -61,6 +61,14 @@ user_model_base = api.clone('User model base', short_user_model, {
     'last_seen': fields.DateTime(readonly=True),
 })
 
+
+user_model_patch = api.clone('User model for patch', short_user_model, {
+    'phone': PhoneNumber,
+    'city': fields.String,
+    'role': fields.String(enum=roles),
+})
+
+
 user_model_with_token = api.clone('User model with token', user_model_base, {
     'token': fields.String,
 })

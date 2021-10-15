@@ -9,7 +9,8 @@ from ip_app.service import services
 from ip_app.serializers.serializers import user_model_with_token, user_model_base, credentials_model, \
     user_model_with_credentials, course_base_model, payment_link_model, cart_model, course_landing_model, \
     available_course_model, available_course_with_video_model, course_full_model, course_post_model, \
-    contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model
+    contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model, \
+    user_model_patch
 from ip_app.utils import PaginationMixin
 
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
@@ -155,24 +156,25 @@ class UserItem(Resource):
     User
     """
     @api.marshal_with(user_model_base)
-    @api.expect(user_model_base)
+    @api.expect(user_model_patch)
     @api.response(403, 'Access denied')
     @api.response(404, 'User not found')
     @role_required(0)
-    def patch(self):
+    def patch(self, user_id):
         """
         Edit optional user profile fields of another_user
         """
-        return 200, {}
+        return services.patch_user(user_id, request.get_json())
 
     @api.marshal_with(user_model_base)
     @api.response(403, 'Access denied')
     @api.response(404, 'User not found')
     @role_required(0)
-    def delete(self):
+    def delete(self, user_id):
         """
         Delete any user
         """
+        services.delete_user(user_id)
         return 200, {}
 
 
@@ -250,13 +252,14 @@ class CurrentUser(Resource):
         """
         Edit optional user profile fields
         """
-        return g.current_user
+        return services.patch_user(g.current_user.user_id, request.get_json())
 
     @role_required()
     def delete(self):
         """
         Delete current user
         """
+        services.delete_user(g.current_user.user_id)
         return 200, {}
 
 

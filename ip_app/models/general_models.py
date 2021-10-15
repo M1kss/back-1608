@@ -46,7 +46,7 @@ class Course(db.Model):
     title = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(250))
     course_pic_url = db.Column(db.String(100))
-    author_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('users.user_id'), nullable=False)
+    author_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('users.user_id', ondelete='SET NULL'), nullable=True)
     landing_info = db.Column(db.JSON, default={})
 
     author = db.relationship(User, backref='authored_courses')
@@ -100,3 +100,6 @@ class Access(db.Model):
     video_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('videos.video_id'), nullable=False)
     begin_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime)
+
+    video = db.relationship(Video, cascade='delete, merge, save-update', backref='access_entries')
+    user = db.relationship(User, cascade='delete, merge, save-update', backref='access_entries')

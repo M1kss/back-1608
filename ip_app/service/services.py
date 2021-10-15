@@ -56,6 +56,20 @@ def register_user(data):
     return True, user
 
 
+def patch_user(user_id, data):
+    user = get_user(user_id)
+    for attr, value in data.items():
+        setattr(user, attr, value)
+    session.commit()
+    return user
+
+
+def delete_user(user_id):
+    user = get_user(user_id)
+    session.delete(user)
+    session.commit()
+
+
 def get_course_applications_filters(args):
     return ()
 
