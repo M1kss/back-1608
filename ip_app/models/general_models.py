@@ -1,5 +1,5 @@
 from ip_app import db
-from ip_app.constants import roles, user_statuses, course_statuses, video_statuses
+from ip_app.constants import roles, user_statuses, course_statuses, video_statuses, order_statuses, discount_types
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
 
 
@@ -52,17 +52,16 @@ class Course(db.Model):
     author = db.relationship(User, backref='authored_courses')
 
 
-class Video(db.Model):
-    __tablename__ = 'videos'
-    video_id = db.Column(INTEGER(unsigned=True), primary_key=True)
-    course_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('courses.course_id'), nullable=False)
-    title = db.Column(db.String(50))
-    description = db.Column(db.String(250))
-    url = db.String(100)
-    duration = db.Column(SMALLINT(unsigned=True))
-    q_and_a = db.Column(db.JSON)
+class Order(db.Model):
+    __tablename__ = 'orders'
+    order_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    user_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('users.user_id', ondelete='SET NULL'), nullable=True)
+    payment_link = db.Column(db.String(150))
+    price = db.Column(INTEGER(unsigned=True))
+    promocode = db.Column(db.String(20))
+    status = db.Column(db.Enum(*order_statuses), default=order_statuses[0])
 
-    course = db.relationship(Course, cascade='delete, merge, save-update', backref='videos')
+    user = db.relationship(User, backref='orders')
 
 
 class CourseProduct(db.Model):
@@ -71,21 +70,62 @@ class CourseProduct(db.Model):
     course_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('courses.course_id'), nullable=False)
     title = db.Column(db.String(50))
     description = db.Column(db.String(250))
-    duration = db.Column(SMALLINT(unsigned=True))
+    duration = db.Column(db.String(25))
     price = db.Column(INTEGER(unsigned=True))
+    discount = db.Column(INTEGER(unsigned=True))
+    discount_type = db.Column(db.Enum(*discount_types))
 
     course = db.relationship(Course, cascade='delete, merge, save-update', backref='course_products')
 
 
 class ServiceProduct(db.Model):
     __tablename__ = 'service_products'
-    course_product_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    service_product_id = db.Column(INTEGER(unsigned=True), primary_key=True)
     course_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('courses.course_id'), nullable=False)
     title = db.Column(db.String(50))
     description = db.Column(db.String(250))
     price = db.Column(INTEGER(unsigned=True))
+    discount = db.Column(INTEGER(unsigned=True))
+    discount_type = db.Column(db.Enum(*discount_types))
 
     course = db.relationship(Course, cascade='delete, merge, save-update', backref='service_products')
+
+
+class OrderCourseProductItem(db.Model):
+    __tablename__ = 'course_pr_items'
+    item_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    price = db.Column(INTEGER(unsigned=True))
+    course_product_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('course_products.course_product_id'),
+                                  nullable=False)
+    order_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('orders.order_id'), nullable=False)
+
+    order = db.relationship(Order, cascade='delete, merge, save-update', backref='course_product_items')
+    course_product = db.relationship(CourseProduct, cascade='delete, merge, save-update')
+
+
+class OrderServiceProductItem(db.Model):
+    __tablename__ = 'service_pr_items'
+    item_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    price = db.Column(INTEGER(unsigned=True))
+    service_product_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('service_products.service_product_id'),
+                                   nullable=False)
+    order_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('orders.order_id'), nullable=False)
+
+    order = db.relationship(Order, cascade='delete, merge, save-update', backref='service_product_items')
+    service_product = db.relationship(ServiceProduct, cascade='delete, merge, save-update')
+
+
+class Video(db.Model):
+    __tablename__ = 'videos'
+    video_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    course_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('courses.course_id'), nullable=False)
+    title = db.Column(db.String(50))
+    description = db.Column(db.String(250))
+    url = db.Column(db.String(150))
+    duration = db.Column(SMALLINT(unsigned=True))
+    q_and_a = db.Column(db.JSON)
+
+    course = db.relationship(Course, cascade='delete, merge, save-update', backref='videos')
 
 
 class Access(db.Model):

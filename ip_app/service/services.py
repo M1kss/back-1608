@@ -1,7 +1,10 @@
 from uuid import uuid4
 
+from sqlalchemy import or_
+
 from ip_app import session, db
-from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct, UserRegistration
+from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct, \
+    UserRegistration, OrderCourseProductItem, OrderServiceProductItem, Order
 
 
 def get_user(value, by='id'):
@@ -36,7 +39,8 @@ def check_credentials(data):
 
 
 def create_database_item(cls, data, include=None, exclude=tuple()):
-    return cls(**{k: v for k, v in data.items() if k not in exclude and (k in include if include is not None else True)})
+    return cls(
+        **{k: v for k, v in data.items() if k not in exclude and (k in include if include is not None else True)})
 
 
 def register_user(data):
@@ -139,7 +143,7 @@ def get_course_ids_available_for_student(user):
 
 
 def get_available_courses_filters_for_student(user):
-    return (Course.course_id.in_(get_course_ids_available_for_student(user)), )
+    return (Course.course_id.in_(get_course_ids_available_for_student(user)),)
 
 
 def get_available_videos_by_student_and_course(user, course_id):
@@ -149,7 +153,9 @@ def get_available_videos_by_student_and_course(user, course_id):
             .join(Access, Access.video_id == Video.video_id)
             .filter(Access.user_id == user.user_id,
                     Access.begin_date <= db.func.now(),
-                    Access.end_date >= db.func.now()).all()
+                    or_(Access.end_date >= db.func.now(),
+                        Access.end_date.is_(None))
+                    ).all()
     ))
 
 
@@ -184,7 +190,8 @@ def create_new_course(data):
 
     course = Course(**data,
                     course_products=[CourseProduct(**course_product_data) for course_product_data in course_products],
-                    service_products=[ServiceProduct(**service_product_data) for service_product_data in service_products],
+                    service_products=[ServiceProduct(**service_product_data) for service_product_data in
+                                      service_products],
                     videos=[Video(**video_data) for video_data in videos])
     session.add(course)
     session.commit()
@@ -223,3 +230,69 @@ def create_registration_hash_and_send_email(data):
     session.commit()
     # TODO: send email
     return True, user_reg.hash
+
+
+def create_payment_link(order_id):
+    # TODO: acquiring
+    return 'http://79.98.29.212/api/v1/payments/callback/{}'.format(order_id)
+
+
+def get_order(order_id):
+    return Order.query.get_or_404(order_id)
+
+
+def create_order(user, data):
+    course_product_ids = data.pop('course_product_ids', [])
+    service_product_ids = data.pop('service_product_ids', [])
+
+    if len(course_product_ids) + len(service_product_ids) == 0:
+        return False, (400, 'Cart is empty')
+
+    course_products = [CourseProduct.query.get_or_404(p_id) for p_id in course_product_ids]
+    service_products = [ServiceProduct.query.get_or_404(p_id) for p_id in service_product_ids]
+
+    data['course_product_items'] = [OrderCourseProductItem(
+        price=pr.price,
+        course_product_id=pr.course_product_id
+    ) for pr in course_products]
+    data['service_product_items'] = [OrderServiceProductItem(
+        price=pr.price,
+        service_product_id=pr.service_product_id
+    ) for pr in service_products]
+
+    data['price'] = sum(pr.price for pr in course_products + service_products)
+    data['user_id'] = user.user_id
+
+    order = create_database_item(Order, data)
+    session.add(order)
+    session.commit()
+
+    try:
+        link = create_payment_link(order_id=order.order_id)
+    except Exception:
+        order.status = 'FAILED'
+        session.commit()
+        return False, (503, 'Payment operational error')
+
+    order.payment_link = link
+    session.commit()
+    return True, order
+
+
+def get_access_items(course_product, user_id): \
+        # TODO: begin_date
+    course_videos = course_product.course.videos
+    return [Access(video_id=video.video_id,
+                   user_id=user_id,
+                   begin_date=db.func.now()) for video in course_videos]
+
+
+def give_access_for_payed_order(order_id):
+    order = get_order(order_id)
+    access_items = []
+    for course_product_item in order.course_product_items:
+        access_items += get_access_items(course_product_item.course_product, order.user_id)
+
+    session.add_all(access_items)
+    order.status = 'PAYED'
+    session.commit()

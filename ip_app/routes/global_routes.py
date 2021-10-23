@@ -270,7 +270,7 @@ class CourseCollection(Resource, PaginationMixin):
     """
     BaseEntity = Course
 
-    @api.marshal_list_with(course_base_model)
+    @api.marshal_list_with(course_landing_model)
     @api.expect(pagination_parser)
     @api.response(403, 'Access denied')
     @role_required()
@@ -388,9 +388,25 @@ class CardPayment(Resource):
     @role_required()
     def post(self):
         """
-        Create a new payment
+        Create a new payment (order)
         """
-        return {}
+        ok, order = services.create_order(g.current_user, request.get_json())
+        if not ok:
+            status, reason = order
+            api.abort(status, reason)
+        return order
+
+
+@pmt_nsp.route('/callback/<int:order_id>')
+class PaymentCallback(Resource):
+    @api.response(404, 'Order not found')
+    @api.doc(security=None)
+    def get(self, order_id):
+        """
+        Payment Callback
+        """
+        services.give_access_for_payed_order(order_id)
+        return 200, {}
 
 
 class ContactsInfo(Resource):

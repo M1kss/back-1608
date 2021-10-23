@@ -208,13 +208,13 @@ course_post_model = api.clone('Course post model', {
 
 payment_link_model = api.model('Payment link model', {
     'order_id': fields.Integer(min=1, readonly=True),
-    'link': fields.String,
+    'payment_link': fields.String,
 })
 
 cart_model = api.model('Order cart', {
     'promocode': fields.String,
-    'course_product_ids': fields.List(fields.Integer(min=1), min_items=1),
-    'service_product_ids': fields.List(fields.Integer(min=1), min_items=1),
+    'course_product_ids': fields.List(fields.Integer(min=1), default=[]),
+    'service_product_ids': fields.List(fields.Integer(min=1), default=[]),
 })
 
 contacts_info_model = api.model('Contacts info', {
