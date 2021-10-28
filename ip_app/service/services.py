@@ -184,10 +184,6 @@ def create_new_course(data):
     course_products = data.pop('course_products')
     service_products = data.pop('service_products')
 
-    author = get_user(data['author_id'])
-    if author.role == 'STUDENT':
-        return None, 400, 'Author can not be a student'
-
     course = Course(**data,
                     course_products=[CourseProduct(**course_product_data) for course_product_data in course_products],
                     service_products=[ServiceProduct(**service_product_data) for service_product_data in
@@ -201,11 +197,7 @@ def create_new_course(data):
 
 def patch_course(course_id, data):
     course = get_course_by_id(course_id)
-    videos = data.pop('videos')
-    if 'author_id' in data:
-        author = get_user(data['author_id'])
-        if author.role == 'STUDENT':
-            return None, 400, 'Author can not be a student'
+    videos = data.pop('videos', [])
     for field, value in data.items():
         setattr(course, field, value)
 

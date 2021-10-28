@@ -83,7 +83,7 @@ course_base_model = api.model('Course base model', {
     'title': fields.String,
     'description': fields.String,
     'course_pic_url': fields.String,
-    'author': fields.Nested(short_user_model),
+    'author_name': fields.String,
 })
 
 available_course_model = api.clone('Avalilable course model', course_base_model, {
@@ -194,7 +194,7 @@ course_patch_model = api.model('Course patch model', {
     'title': fields.String,
     'description': fields.String,
     'course_pic_url': fields.String,
-    'author_id': fields.Integer(min=1),
+    'author_name': fields.String(required=True),
     'landing_info': fields.Nested(landing_info_model),
     'videos': fields.List(fields.Nested(patch_video_model), default=[])
 })
@@ -204,7 +204,7 @@ course_post_model = api.model('Course post model', {
     'title': fields.String(required=True),
     'description': fields.String,
     'course_pic_url': fields.String,
-    'author_id': fields.Integer(min=1, required=True),
+    'author_name': fields.String(required=True),
     'landing_info': fields.Nested(landing_info_model, required=True),
     'course_products': fields.List(fields.Nested(course_product_model), required=True, min_items=1),
     'service_products': fields.List(fields.Nested(service_product_model), default=[]),

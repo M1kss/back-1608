@@ -46,10 +46,8 @@ class Course(db.Model):
     title = db.Column(db.String(50), nullable=False)
     description = db.Column(db.String(250))
     course_pic_url = db.Column(db.String(100))
-    author_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('users.user_id', ondelete='SET NULL'), nullable=True)
+    author_name = db.Column(db.String(30), nullable=True)
     landing_info = db.Column(db.JSON, default={})
-
-    author = db.relationship(User, backref='authored_courses')
 
 
 class Order(db.Model):
