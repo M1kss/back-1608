@@ -10,7 +10,7 @@ from ip_app.serializers.serializers import user_model_with_token, user_model_bas
     user_model_with_credentials, course_base_model, payment_link_model, cart_model, course_landing_model, \
     available_course_model, available_course_with_video_model, course_full_model, course_post_model, \
     contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model, \
-    user_model_patch
+    user_model_patch, course_patch_model
 from ip_app.utils import PaginationMixin
 
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
@@ -310,7 +310,7 @@ class CourseItem(Resource):
         """
         return services.get_course_by_id(course_id)
 
-    @api.expect(course_post_model)
+    @api.expect(course_patch_model)
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Course does not exist')

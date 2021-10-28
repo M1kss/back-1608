@@ -96,8 +96,7 @@ q_and_a_model = api.model('Q&A model', {
     'answer': fields.String,
 })
 
-video_model = api.model('Video model', {
-    'video_id': fields.Integer(min=1, readonly=True),
+video_base_model = api.model('Base video model', {
     'title': fields.String(required=True),
     'description': fields.String,
     'url': fields.String(required=True),
@@ -105,7 +104,11 @@ video_model = api.model('Video model', {
     'q_and_a': fields.List(fields.Nested(q_and_a_model)),
 })
 
-patch_video_model = api.clone('Video model with id', video_model, {
+video_model = api.clone('Video model', video_base_model, {
+    'video_id': fields.Integer(min=1, readonly=True),
+})
+
+patch_video_model = api.clone('Video model with id', video_base_model, {
     'video_id': fields.Integer(min=1, required=True),
 })
 
@@ -195,7 +198,7 @@ course_patch_model = api.model('Course patch model', {
 })
 
 
-course_post_model = api.clone('Course post model', {
+course_post_model = api.model('Course post model', {
     'title': fields.String(required=True),
     'description': fields.String,
     'course_pic_url': fields.String,
