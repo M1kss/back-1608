@@ -198,6 +198,9 @@ def create_new_course(data):
 def patch_course(course_id, data):
     course = get_course_by_id(course_id)
     videos = data.pop('videos', [])
+    new_landing_info = data.pop('landing_info', None)
+    if new_landing_info is not None:
+        course.landing_info.update(new_landing_info)
     for field, value in data.items():
         setattr(course, field, value)
 
