@@ -314,7 +314,6 @@ class CourseItem(Resource):
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Course does not exist')
-    @api.response(404, 'Items not found')
     @api.response(400, 'Incorrect video id for course')
     @role_required(0)
     def patch(self, course_id):
@@ -324,7 +323,7 @@ class CourseItem(Resource):
         course, code, reason = services.patch_course(course_id, request.get_json())
         if course is None:
             api.abort(code, reason)
-        return {}
+        return course
 
     @api.response(403, 'Access denied')
     @api.response(404, 'Course does not exist')
