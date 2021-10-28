@@ -75,7 +75,7 @@ class CourseProduct(db.Model):
     discount = db.Column(INTEGER(unsigned=True))
     discount_type = db.Column(db.Enum(*discount_types))
 
-    course = db.relationship(Course, backref='course_products')
+    course = db.relationship(Course, backref=db.backref('course_products', cascade="all, delete"))
 
 
 class ServiceProduct(db.Model):
@@ -88,7 +88,7 @@ class ServiceProduct(db.Model):
     discount = db.Column(INTEGER(unsigned=True))
     discount_type = db.Column(db.Enum(*discount_types))
 
-    course = db.relationship(Course, backref='service_products')
+    course = db.relationship(Course, backref=db.backref('service_products', cascade="all, delete"))
 
 
 class OrderCourseProductItem(db.Model):
@@ -99,8 +99,8 @@ class OrderCourseProductItem(db.Model):
                                   nullable=False)
     order_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('orders.order_id', ondelete="CASCADE"), nullable=False)
 
-    order = db.relationship(Order, backref='course_product_items')
-    course_product = db.relationship(CourseProduct)
+    order = db.relationship(Order, backref=db.backref('course_product_items', cascade="all, delete"))
+    course_product = db.relationship(CourseProduct, backref=db.backref('order_items', cascade="all, delete"))
 
 
 class OrderServiceProductItem(db.Model):
@@ -111,7 +111,7 @@ class OrderServiceProductItem(db.Model):
                                    nullable=False)
     order_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('orders.order_id', ondelete="CASCADE"), nullable=False)
 
-    order = db.relationship(Order, backref='service_product_items')
+    order = db.relationship(Order, backref=db.backref('service_product_items', cascade="all, delete"))
     service_product = db.relationship(ServiceProduct)
 
 
@@ -125,7 +125,7 @@ class Video(db.Model):
     duration = db.Column(SMALLINT(unsigned=True))
     q_and_a = db.Column(db.JSON)
 
-    course = db.relationship(Course, backref='videos')
+    course = db.relationship(Course, backref=db.backref('videos', cascade="all, delete",))
 
 
 class Access(db.Model):
@@ -141,5 +141,5 @@ class Access(db.Model):
     begin_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime)
 
-    video = db.relationship(Video, backref='access_entries')
-    user = db.relationship(User, backref='access_entries')
+    video = db.relationship(Video, backref=db.backref('access_entries', cascade="all, delete"))
+    user = db.relationship(User, backref=db.backref('access_entries', cascade="all, delete"))
