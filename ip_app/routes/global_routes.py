@@ -318,7 +318,7 @@ class CourseItem(Resource):
     @api.response(400, 'Author can not be a student')
     @api.response(400, 'Incorrect video id for course')
     @role_required(0)
-    def put(self, course_id):
+    def patch(self, course_id):
         """
         Edit an existing course by id
         """

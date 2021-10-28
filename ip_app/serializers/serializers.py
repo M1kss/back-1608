@@ -97,19 +97,21 @@ q_and_a_model = api.model('Q&A model', {
 })
 
 video_base_model = api.model('Base video model', {
-    'title': fields.String(required=True),
     'description': fields.String,
-    'url': fields.String(required=True),
     'duration': fields.Integer(description='duration in seconds'),
     'q_and_a': fields.List(fields.Nested(q_and_a_model)),
 })
 
 video_model = api.clone('Video model', video_base_model, {
     'video_id': fields.Integer(min=1, readonly=True),
+    'title': fields.String(required=True),
+    'url': fields.String(required=True),
 })
 
 patch_video_model = api.clone('Video model with id', video_base_model, {
     'video_id': fields.Integer(min=1, required=True),
+    'title': fields.String,
+    'url': fields.String,
 })
 
 video_with_progress_model = api.clone('Video model with progress', video_model, {
