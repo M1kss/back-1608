@@ -337,6 +337,22 @@ class CourseItem(Resource):
         return 200, {}
 
 
+@crs_nsp.route('/full/<int:course_id>')
+class FullCourseItem(Resource):
+    """
+    Complete information about a single course
+    """
+    @api.marshal_with(course_full_model)
+    @api.response(403, 'Access denied')
+    @api.response(404, 'Course does not exist')
+    @role_required(0)
+    def get(self, course_id):
+        """
+        Get course by id (full info)
+        """
+        return services.get_course_by_id(course_id)
+
+
 @crs_nsp.route('/available')
 class AvailableCourseCollection(Resource, PaginationMixin):
     """
