@@ -200,7 +200,9 @@ def patch_course(course_id, data):
     videos = data.pop('videos', [])
     new_landing_info = data.pop('landing_info', None)
     if new_landing_info is not None:
-        course.landing_info = dict(course.landing_info).update(new_landing_info)
+        land_info = dict(course.landing_info)
+        land_info.update(new_landing_info)
+        course.landing_info = land_info
     for field, value in data.items():
         setattr(course, field, value)
 
