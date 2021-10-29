@@ -194,7 +194,7 @@ course_patch_model = api.model('Course patch model', {
     'title': fields.String,
     'description': fields.String,
     'course_pic_url': fields.String,
-    'author_name': fields.String(required=True),
+    'author_name': fields.String,
     'landing_info': fields.Nested(landing_info_model),
     'videos': fields.List(fields.Nested(patch_video_model), default=[])
 })
