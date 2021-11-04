@@ -111,6 +111,7 @@ class CourseApplicationCollection(Resource, PaginationMixin):
 
     @api.expect(course_application_model)
     @api.response(409, 'User already exists')
+    @api.marshal_with(course_application_model)
     @api.doc(security=None)
     def post(self):
         """
@@ -419,7 +420,7 @@ class PaymentCallback(Resource):
         """
         Payment Callback
         """
-        services.give_access_for_payed_order(order_id)
+        services.grant_access_for_payed_order(order_id)
         return 200, {}
 
 

@@ -240,6 +240,26 @@ def get_order(order_id):
     return Order.query.get_or_404(order_id)
 
 
+def get_user_product_ids(user, for_what):
+    assert for_what in 'course', 'service'
+    product_id = '{}_product_id'.format(for_what)
+    product_items = '{}_product_items'.format(for_what)
+
+    return set(
+        getattr(product_item, product_id)
+        for order in user.orders
+        for product_item in getattr(order, product_items)
+    )
+
+
+def check_purchased_course_product_ids(user, course_product_ids):
+    return set(course_product_ids) | get_user_product_ids(user, 'course')
+
+
+def check_purchased_service_product_ids(user, service_product_ids):
+    return set(service_product_ids) | get_user_product_ids(user, 'service')
+
+
 def create_order(user, data):
     course_product_ids = data.pop('course_product_ids', [])
     service_product_ids = data.pop('service_product_ids', [])
@@ -249,6 +269,13 @@ def create_order(user, data):
 
     course_products = [CourseProduct.query.get_or_404(p_id) for p_id in course_product_ids]
     service_products = [ServiceProduct.query.get_or_404(p_id) for p_id in service_product_ids]
+
+    purchased_course_product_ids = check_purchased_course_product_ids(user, course_product_ids)
+    purchased_service_product_ids = check_purchased_service_product_ids(user, course_product_ids)
+    if len(purchased_course_product_ids) + len(purchased_service_product_ids) != 0:
+        return False, (403, 'One or more products already purchased,'
+                            'course: {}, service: {}'.format(purchased_course_product_ids,
+                                                             purchased_service_product_ids))
 
     data['course_product_items'] = [OrderCourseProductItem(
         price=pr.price,
@@ -283,10 +310,14 @@ def get_access_items(course_product, user_id): \
     course_videos = course_product.course.videos
     return [Access(video_id=video.video_id,
                    user_id=user_id,
-                   begin_date=db.func.now()) for video in course_videos]
+                   begin_date=db.func.now()) for video in course_videos
+            if not Access.query.filter_by(
+                video_id=video.video_id,
+                user_id=user_id,
+            ).one_or_none()]
 
 
-def give_access_for_payed_order(order_id):
+def grant_access_for_payed_order(order_id):
     order = get_order(order_id)
     access_items = []
     for course_product_item in order.course_product_items:
