@@ -244,11 +244,6 @@ def get_user_product_ids(user, for_what):
     assert for_what in ('course', 'service')
     product_id = '{}_product_id'.format(for_what)
     product_items = '{}_product_items'.format(for_what)
-    print(set(
-        getattr(product_item, product_id)
-        for order in user.orders
-        for product_item in getattr(order, product_items)
-    ))
     return set(
         getattr(product_item, product_id)
         for order in user.orders
@@ -257,11 +252,11 @@ def get_user_product_ids(user, for_what):
 
 
 def check_purchased_course_product_ids(user, course_product_ids):
-    return set(course_product_ids) | get_user_product_ids(user, 'course')
+    return set(course_product_ids) & get_user_product_ids(user, 'course')
 
 
 def check_purchased_service_product_ids(user, service_product_ids):
-    return set(service_product_ids) | get_user_product_ids(user, 'service')
+    return set(service_product_ids) & get_user_product_ids(user, 'service')
 
 
 def create_order(user, data):
