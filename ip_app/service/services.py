@@ -241,11 +241,14 @@ def get_order(order_id):
 
 
 def get_user_product_ids(user, for_what):
-    print(for_what)
     assert for_what in ('course', 'service')
     product_id = '{}_product_id'.format(for_what)
     product_items = '{}_product_items'.format(for_what)
-
+    print(set(
+        getattr(product_item, product_id)
+        for order in user.orders
+        for product_item in getattr(order, product_items)
+    ))
     return set(
         getattr(product_item, product_id)
         for order in user.orders
