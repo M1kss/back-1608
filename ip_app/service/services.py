@@ -149,16 +149,14 @@ def get_available_courses_filters_for_student(user):
 
 
 def get_available_videos_by_student_and_course(user, course_id):
-    return list(*zip(
-        *session.query(Video)
-            .filter(Video.course_id == course_id)
-            .join(Access, Access.video_id == Video.video_id)
+    return Video.query\
+            .filter(Video.course_id == course_id)\
+            .join(Access, Access.video_id == Video.video_id)\
             .filter(Access.user_id == user.user_id,
                     Access.begin_date <= db.func.now(),
                     or_(Access.end_date >= db.func.now(),
                         Access.end_date.is_(None))
                     ).all()
-    ))
 
 
 def get_video_by_id(video_id):
