@@ -241,7 +241,8 @@ def get_order(order_id):
 
 
 def get_user_product_ids(user, for_what):
-    assert for_what in 'course', 'service'
+    print(for_what)
+    assert for_what in ('course', 'service')
     product_id = '{}_product_id'.format(for_what)
     product_items = '{}_product_items'.format(for_what)
 
