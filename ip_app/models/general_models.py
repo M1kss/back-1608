@@ -3,16 +3,6 @@ from ip_app.constants import roles, user_statuses, course_statuses, video_status
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
 
 
-class CourseApplication(db.Model):
-    __tablename__ = 'course_applications'
-    application_id = db.Column(INTEGER(unsigned=True), primary_key=True)
-    course_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('courses.course_id', ondelete="SET NULL"))
-    email = db.Column(db.String(30), nullable=False)
-    phone = db.Column(db.String(10), nullable=False)
-    name = db.Column(db.String(30), nullable=False)
-    application_date = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
-
-
 class UserRegistration(db.Model):
     __tablename__ = 'users_registration'
     email = db.Column(db.String(30), primary_key=True)
@@ -124,6 +114,18 @@ class Video(db.Model):
     q_and_a = db.Column(db.JSON)
 
     course = db.relationship(Course, backref=db.backref('videos', cascade="all, delete",))
+
+
+class CourseApplication(db.Model):
+    __tablename__ = 'course_applications'
+    application_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    course_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('courses.course_id', ondelete="SET NULL"))
+    email = db.Column(db.String(30), nullable=False)
+    phone = db.Column(db.String(10), nullable=False)
+    name = db.Column(db.String(30), nullable=False)
+    is_registered = db.Column(db.Boolean)
+    application_date = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
+    course = db.relationship(Course, backref='courses')
 
 
 class Access(db.Model):

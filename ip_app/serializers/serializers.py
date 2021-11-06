@@ -250,5 +250,8 @@ course_application_model = api.model('Course application', {
     'name': fields.String(min_length=1, required=True),
     'email': Email(required=True),
     'phone': PhoneNumber(required=True),
+    'application_date': fields.DateTime(readonly=True),
     'course_id': fields.Integer(required=True),
+    'is_registered': fields.Boolean(readonly=True),
+    'course': fields.Nested(course_base_model, readonly=True)
 })
