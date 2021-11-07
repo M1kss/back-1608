@@ -12,3 +12,4 @@ order_statuses = ('CREATED', 'FAILED', 'PAYED')
 discount_types = ('P', 'R')
 EMAIL_REGEX = r'\S+@\S+\.\S+'
 PHONE_REGEX = r'^[0-9]{10}$'
+sex_choices = ('F', 'M')

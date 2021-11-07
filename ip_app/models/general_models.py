@@ -1,5 +1,6 @@
 from ip_app import db
-from ip_app.constants import roles, user_statuses, course_statuses, video_statuses, order_statuses, discount_types
+from ip_app.constants import roles, user_statuses, course_statuses, video_statuses, order_statuses, discount_types, \
+    sex_choices
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT
 
 
@@ -27,6 +28,8 @@ class User(db.Model):
     profile_pic_url = db.Column(db.String(150))
     phone = db.Column(db.String(10))
     city = db.Column(db.String(30))
+    sex = db.Column(db.Enum(*sex_choices))
+    birth_date = db.Column(db.Date)
     password_hash = db.Column(db.String(100))
 
 

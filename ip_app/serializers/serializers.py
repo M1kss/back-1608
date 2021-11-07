@@ -1,6 +1,7 @@
 from flask_restplus import fields
 from ip_app import api
-from ip_app.constants import roles, user_statuses, course_statuses, video_statuses, EMAIL_REGEX, PHONE_REGEX
+from ip_app.constants import roles, user_statuses, course_statuses, video_statuses, EMAIL_REGEX, PHONE_REGEX, \
+    sex_choices
 
 
 class Email(fields.String):
@@ -49,6 +50,9 @@ first_step_registration_model = api.model('Check user model', {
     'phone': PhoneNumber,
     'name': fields.String(min_length=1),
     'last_name': fields.String(min_length=1),
+    'city': fields.String,
+    'birth_date': fields.Date,
+    'sex': fields.String(enum=sex_choices)
 })
 
 user_model_base = api.clone('User model base', short_user_model, {
@@ -59,6 +63,8 @@ user_model_base = api.clone('User model base', short_user_model, {
     'status': fields.String(enum=user_statuses, readonly=True),
     'registration_date': fields.DateTime(readonly=True),
     'last_seen': fields.DateTime(readonly=True),
+    'birth_date': fields.Date,
+    'sex': fields.String(enum=sex_choices)
 })
 
 
