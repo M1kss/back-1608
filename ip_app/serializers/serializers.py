@@ -50,9 +50,6 @@ first_step_registration_model = api.model('Check user model', {
     'phone': PhoneNumber,
     'name': fields.String(min_length=1),
     'last_name': fields.String(min_length=1),
-    'city': fields.String,
-    'birth_date': fields.Date,
-    'sex': fields.String(enum=sex_choices)
 })
 
 user_model_base = api.clone('User model base', short_user_model, {
