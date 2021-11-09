@@ -115,7 +115,7 @@ def get_course_applications_by_id(app_id):
 
 
 def add_course_application(data):
-    data['is_registered'] = email_exists(data['email'])
+    data['is_registered'] = True if email_exists(data['email']) else False
     application = CourseApplication(**data)
     session.add(application)
     session.commit()
