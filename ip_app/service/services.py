@@ -53,6 +53,7 @@ def register_user(data):
             data[attr] = getattr(user_reg, attr)
     user = create_database_item(User, data, exclude=('password', 'hash'))
     user.password_hash = get_hash(data['password'])
+    update_last_seen(user)
     session.add(user)
     session.commit()
 
