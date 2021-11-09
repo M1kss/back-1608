@@ -110,7 +110,6 @@ class CourseApplicationCollection(Resource, PaginationMixin):
     BaseEntity = CourseApplication
 
     @api.expect(course_application_model)
-    @api.response(409, 'User already exists')
     @api.marshal_with(course_application_model)
     @api.doc(security=None)
     def post(self):
@@ -118,8 +117,6 @@ class CourseApplicationCollection(Resource, PaginationMixin):
         Apply to a course
         """
         data = request.get_json()
-        if services.email_exists(data['email']):
-            return 409, 'User already exists'
         return services.add_course_application(data)
 
     @api.marshal_list_with(course_application_model)
