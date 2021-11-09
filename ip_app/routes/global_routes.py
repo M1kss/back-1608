@@ -1,7 +1,8 @@
+from datetime import datetime
 from functools import wraps
 
 from flask_restplus import Resource, inputs
-from ip_app import api
+from ip_app import api, check_last_seen
 from ip_app.models import User, CourseApplication, Course
 from flask import request, g
 from ip_app.constants import roles
@@ -35,6 +36,8 @@ def role_required(role_id=len(roles) - 1):
                 if user is None:
                     raise ValueError
                 current_role = user.role
+                if not check_last_seen(user):
+                    api.abort(410, 'token expired')
             except:
                 api.abort(401, 'invalid token')
 
@@ -70,8 +73,9 @@ class PwdAuth(Resource):
         """
         ok, user = services.check_credentials(request.get_json())
         if ok:
+            if not check_last_seen(user):
+                services.update_user_token(user)
             services.update_last_seen(user)
-            services.update_user_token(user)
             return user
         else:
             api.abort(403, 'Invalid credentials')

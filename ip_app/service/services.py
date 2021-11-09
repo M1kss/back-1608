@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import or_
@@ -90,6 +91,14 @@ def update_last_seen(user):
 def update_user_token(user):
     user.token = generate_token()
     session.commit()
+
+
+def check_last_seen(user):
+    time_since_last_seen = datetime.now() - user.last_seen
+    if time_since_last_seen.days > 0 or time_since_last_seen.seconds >= 3600:
+        return False
+    else:
+        return True
 
 
 def get_users_filters_by_teacher(user):
