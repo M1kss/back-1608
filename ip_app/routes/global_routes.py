@@ -17,6 +17,7 @@ from ip_app.utils import PaginationMixin
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
 usr_nsp = api.namespace('Users', path='/users', description='Operations related to user accounts')
 crs_nsp = api.namespace('Courses', path='/courses', description='Operations related to courses')
+vds_nsp = api.namespace('Videos', path='/videos', description='Operations related to videos')
 pmt_nsp = api.namespace('Payments', path='/payments', description='Operations related to payments')
 stc_nsp = api.namespace('Statistics', path='/statistics', description='Operations related to sales and users statistics')
 otr_nsp = api.namespace('Other', path='/other', description='Other operations')
@@ -422,6 +423,25 @@ class PaymentCallback(Resource):
         Payment Callback
         """
         services.grant_access_for_payed_order(order_id)
+        return 200, {}
+
+
+@vds_nsp.route('/callback/<int:video_id>')
+class PaymentCallback(Resource):
+    @api.response(404, 'Video not found')
+    @role_required()
+    def get(self, video_id):
+        """
+        Get video tracking info
+        """
+        return 200, {}
+
+    @api.response(404, 'Video not found')
+    @role_required()
+    def post(self, video_id):
+        """
+        Post video tracking info
+        """
         return 200, {}
 
 

@@ -146,3 +146,34 @@ class Access(db.Model):
 
     video = db.relationship(Video, backref=db.backref('access_entries', cascade="all, delete"))
     user = db.relationship(User, backref=db.backref('access_entries', cascade="all, delete"))
+
+
+class VideoProgressTracking(db.Model):
+    __tablename__ = 'video_progress'
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'video_id',
+                            name='unique_video_progress_entry'),
+    )
+    video_progress_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    video_id = db.Column(INTEGER(unsigned=True),
+                         db.ForeignKey('videos.video_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(INTEGER(unsigned=True),
+                        db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
+    # last_timestamp = db.Column(db.Integer)
+    progress_percent = db.Column(db.Integer)
+    course_progress_id = db.Column(INTEGER(unsigned=True),
+                                   db.ForeignKey('course_progress.course_progress_id',
+                                                 ondelete="CASCADE"), nullable=False)
+
+
+class CourseProgressTracking(db.Model):
+    __tablename__ = 'course_progress'
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'course_id',
+                            name='unique_course_progress_entry'),
+    )
+    course_progress_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    course_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('courses.course_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
+    # last_timestamp = db.Column(db.Integer)
+    progress_percent = db.Column(db.Integer)

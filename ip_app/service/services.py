@@ -339,3 +339,5 @@ def grant_access_for_payed_order(order_id):
     session.add_all(access_items)
     order.status = 'PAYED'
     session.commit()
+
+
