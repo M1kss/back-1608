@@ -98,7 +98,7 @@ def check_last_seen(user):
     if user.token is None:
         return False
     time_since_last_seen = datetime.now() - user.last_seen
-    if time_since_last_seen.days > 0 or time_since_last_seen.seconds >= 3600:
+    if time_since_last_seen.days > 0 or time_since_last_seen.seconds >= 48 * 3600:
         return False
     else:
         return True
