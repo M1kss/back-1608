@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from sqlalchemy import or_
 
-from ip_app import session, db
+from ip_app import session, db, VideoProgressTracking, CourseProgressTracking
 from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct, \
     UserRegistration, OrderCourseProductItem, OrderServiceProductItem, Order
 
@@ -318,7 +318,7 @@ def create_order(user, data):
     return True, order
 
 
-def get_access_items(course_product, user_id): \
+def create_access_items(course_product, user_id): \
         # TODO: begin_date
     course_videos = course_product.course.videos
     return [Access(video_id=video.video_id,
@@ -334,10 +334,71 @@ def grant_access_for_payed_order(order_id):
     order = get_order(order_id)
     access_items = []
     for course_product_item in order.course_product_items:
-        access_items += get_access_items(course_product_item.course_product, order.user_id)
+        access_items += create_access_items(course_product_item.course_product, order.user_id)
 
     session.add_all(access_items)
     order.status = 'PAYED'
     session.commit()
 
+    for course_product_item in order.course_product_items:
+        update_course_progress_video_count(
+            get_course_progress(order.user_id, course_product_item.course_product.course_id)
+        )
+    session.commit()
 
+
+def get_course_progress(user_id, course_id):
+    return CourseProgressTracking.query.filter(
+        CourseProgressTracking.course_id == course_id,
+        CourseProgressTracking.user_id == user_id
+    ).one_or_none()
+
+
+def update_video_progress(user, data):
+    video = get_video_by_id(data['video_id'])
+    video_progress = VideoProgressTracking.query.filter(
+        VideoProgressTracking.video_id == video.video_id,
+        VideoProgressTracking.user_id == user.user_id
+    ).one_or_none()
+    if video_progress is None:
+        course_progress = get_course_progress(user.user_id,
+                                              video.course_id)
+        if course_progress is None:
+            course_progress = CourseProgressTracking(
+                course_id=video.course_id,
+                user_id=user.user_id
+            )
+            update_course_progress_video_count(course_progress)
+            session.add(course_progress)
+        video_progress = VideoProgressTracking(
+            video_id=video.video_id,
+            user_id=user.user_id,
+            course_progress=course_progress
+        )
+        session.add(video_progress)
+    video_progress.progress_percent = round_progress_percent(data['progress_percent'])
+    update_course_progress(video_progress.course_progress)
+    session.commit()
+    return video_progress
+
+
+def update_course_progress_video_count(course_progress):
+    course_progress.video_count = Access.query.filter(
+        Access.user_id == course_progress.user_id,
+    ).join(
+        Video,
+        Access.video
+    ).filter(
+        Video.course_id == course_progress.course_id
+    ).count()
+
+
+def update_course_progress(course_progress):
+    course_progress.progress_percent = sum(
+        video_progress.progress_percent
+        for video_progress in course_progress.video_progress_items
+    ) / course_progress.video_count
+
+
+def round_progress_percent(progress):
+    return 100 if progress >= 95 else progress

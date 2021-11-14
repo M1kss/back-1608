@@ -117,9 +117,14 @@ patch_video_model = api.clone('Video model with id', video_base_model, {
     'url': fields.String,
 })
 
+video_progress_model = api.model('Video progress', {
+    'video_progress_id': fields.Integer(readonly=True),
+    'video_id': fields.Integer(required=True),
+    'progress_percent': fields.Integer(required=True)
+})
+
 video_with_progress_model = api.clone('Video model with progress', video_model, {
-    'percent_completed': fields.Integer(readonly=True),
-    'status': fields.String(enum=video_statuses, readonly=True),
+    'progress': fields.Nested(video_progress_model, readonly=True),
 })
 
 available_course_with_video_model = api.clone('Course model with videos', course_base_model, {

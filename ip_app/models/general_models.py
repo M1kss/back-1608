@@ -148,6 +148,19 @@ class Access(db.Model):
     user = db.relationship(User, backref=db.backref('access_entries', cascade="all, delete"))
 
 
+class CourseProgressTracking(db.Model):
+    __tablename__ = 'course_progress'
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'course_id',
+                            name='unique_course_progress_entry'),
+    )
+    course_progress_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    course_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('courses.course_id', ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
+    progress_percent = db.Column(db.Integer, server_default='0')
+    video_count = db.Column(db.Integer, server_default='0')
+
+
 class VideoProgressTracking(db.Model):
     __tablename__ = 'video_progress'
     __table_args__ = (
@@ -160,20 +173,10 @@ class VideoProgressTracking(db.Model):
     user_id = db.Column(INTEGER(unsigned=True),
                         db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
     # last_timestamp = db.Column(db.Integer)
-    progress_percent = db.Column(db.Integer)
+    progress_percent = db.Column(db.Integer, server_default='0')
     course_progress_id = db.Column(INTEGER(unsigned=True),
                                    db.ForeignKey('course_progress.course_progress_id',
                                                  ondelete="CASCADE"), nullable=False)
-
-
-class CourseProgressTracking(db.Model):
-    __tablename__ = 'course_progress'
-    __table_args__ = (
-        db.UniqueConstraint('user_id', 'course_id',
-                            name='unique_course_progress_entry'),
-    )
-    course_progress_id = db.Column(INTEGER(unsigned=True), primary_key=True)
-    course_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('courses.course_id', ondelete="CASCADE"), nullable=False)
-    user_id = db.Column(INTEGER(unsigned=True), db.ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False)
-    # last_timestamp = db.Column(db.Integer)
-    progress_percent = db.Column(db.Integer)
+    course_progress = db.relationship(CourseProgressTracking,
+                                      backref=db.backref('video_progress_items',
+                                                         cascade="all, delete"))

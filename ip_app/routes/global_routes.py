@@ -11,7 +11,7 @@ from ip_app.serializers.serializers import user_model_with_token, user_model_bas
     user_model_with_credentials, course_base_model, payment_link_model, cart_model, course_landing_model, \
     available_course_model, available_course_with_video_model, course_full_model, course_post_model, \
     contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model, \
-    user_model_patch, course_patch_model
+    user_model_patch, course_patch_model, video_progress_model
 from ip_app.utils import PaginationMixin
 
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
@@ -426,23 +426,17 @@ class PaymentCallback(Resource):
         return 200, {}
 
 
-@vds_nsp.route('/callback/<int:video_id>')
+@vds_nsp.route('/callback')
 class PaymentCallback(Resource):
     @api.response(404, 'Video not found')
+    @api.marshal_with(video_progress_model)
     @role_required()
-    def get(self, video_id):
-        """
-        Get video tracking info
-        """
-        return 200, {}
-
-    @api.response(404, 'Video not found')
-    @role_required()
-    def post(self, video_id):
+    def post(self):
         """
         Post video tracking info
         """
-        return 200, {}
+        video_progress = services.update_video_progress(g.curent_user, request.get_json())
+        return video_progress
 
 
 class ContactsInfo(Resource):
