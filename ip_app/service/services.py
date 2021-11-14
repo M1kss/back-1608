@@ -162,15 +162,22 @@ def get_available_courses_filters_for_student(user):
     return (Course.course_id.in_(get_course_ids_available_for_student(user)),)
 
 
-def get_available_videos_by_student_and_course(user, course_id):
-    return Video.query\
-            .filter(Video.course_id == course_id)\
-            .join(Access, Access.video_id == Video.video_id)\
-            .filter(Access.user_id == user.user_id,
-                    Access.begin_date <= db.func.now(),
-                    or_(Access.end_date >= db.func.now(),
-                        Access.end_date.is_(None))
-                    ).all()
+def get_available_videos_by_student_and_course_with_progress(user, course_id):
+    return session.query(Video, VideoProgressTracking).filter(
+        Video.course_id == course_id
+    ).join(
+        Access,
+        Access.video_id == Video.video_id
+    ).filter(
+        Access.user_id == user.user_id,
+        Access.begin_date <= db.func.now(),
+        or_(Access.end_date >= db.func.now(), Access.end_date.is_(None))
+    ).join(
+        VideoProgressTracking,
+        VideoProgressTracking.video_id == Video.video_id,
+        VideoProgressTracking.user_id == user.user_id,
+        isouter=True
+    ).all()
 
 
 def get_video_by_id(video_id):
@@ -179,7 +186,10 @@ def get_video_by_id(video_id):
 
 def get_course_by_id_if_available(course_id, user):
     course = get_course_by_id(course_id)
-    course.available_videos = get_available_videos_by_student_and_course(user, course_id)
+    course.available_videos = [setattr(video, 'progress', video_progress) or video
+                               for video, video_progress in
+                               get_available_videos_by_student_and_course_with_progress(user, course_id)]
+
     course.video_count = len(course.videos)
     if course.available_videos:
         return True, course
