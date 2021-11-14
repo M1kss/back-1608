@@ -91,7 +91,6 @@ course_base_model = api.model('Course base model', {
 
 available_course_model = api.clone('Avalilable course model', course_base_model, {
     'percent_completed': fields.Integer,
-    'status': fields.String(enum=course_statuses),
 })
 
 q_and_a_model = api.model('Q&A model', {
