@@ -168,12 +168,14 @@ def get_course_ids_available_for_student(user):
 
 def get_available_courses_filters_for_student(user):
     available_course_ids = get_course_ids_available_for_student(user)
+    print(available_course_ids)
     course_track_items = session.query(Course, CourseProgressTracking).filter(
         Course.course_id.in_(available_course_ids)
     ).join(
         CourseProgressTracking,
         CourseProgressTracking.course_id == Course.course_id,
-        CourseProgressTracking.user_id == user.user_id
+        CourseProgressTracking.user_id == user.user_id,
+        isouter=True
     ).all()
     for course, course_progress in course_track_items:
         course.progress = course_progress.progress_percent
