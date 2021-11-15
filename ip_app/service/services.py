@@ -167,6 +167,7 @@ def get_course_ids_available_for_student(user):
 
 
 def get_available_courses_filters_for_student(user):
+    #FIXME
     available_course_ids = get_course_ids_available_for_student(user)
     course_track_items = session.query(
         Course, CourseProgressTracking
@@ -177,9 +178,7 @@ def get_available_courses_filters_for_student(user):
         and_(CourseProgressTracking.course_id == Course.course_id,
              CourseProgressTracking.user_id == user.user_id),
         isouter=True
-    ).all()
-    for course, course_progress in course_track_items:
-        course.progress = None if course_progress is None else course_progress.progress_percent
+    )
     return course_track_items
 
 
@@ -195,8 +194,8 @@ def get_available_videos_by_student_and_course_with_progress(user, course_id):
         or_(Access.end_date >= db.func.now(), Access.end_date.is_(None))
     ).join(
         VideoProgressTracking,
-        VideoProgressTracking.video_id == Video.video_id,
-        VideoProgressTracking.user_id == user.user_id,
+        and_(VideoProgressTracking.video_id == Video.video_id,
+             VideoProgressTracking.user_id == user.user_id),
         isouter=True
     ).all()
 
