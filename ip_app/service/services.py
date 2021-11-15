@@ -179,7 +179,7 @@ def get_available_courses_filters_for_student(user):
         isouter=True
     ).all()
     for course, course_progress in course_track_items:
-        course.progress = course_progress.progress_percent
+        course.progress = None if course_progress is None else course_progress.progress_percent
     return course_track_items
 
 
