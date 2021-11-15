@@ -71,7 +71,7 @@ class PaginationMixin:
 
         return order_clauses
 
-    def paginate(self, args, extra_filters=(), default_order_clauses=(), mode='all'):
+    def paginate(self, args, query=None, extra_filters=(), default_order_clauses=(), mode='all'):
         """
         Returns list of self.BaseEntity objects taking into account the parameters passed in args.
         :param args: dictionary with the following keys:
@@ -80,6 +80,7 @@ class PaginationMixin:
                      offset - number of objects should be skipped before pagination.
                      page - number of page to return. Ignored, if size is not positive integer.
                      order_by - string specifying order of objects in the selection. See `parse_order_clauses` method.
+        :param query: query to be paginated. extra_filters and default_order_clauses are ignored
         :param extra_filters: list of additional filters in sqlalchemy format, like 'User.id == 4'.
                               Use this parameter to restrict access to objects without changing filtering string.
         :param default_order_clauses: list of additional order by clauses in sqlalchemy format, like 'User.id'.
@@ -94,15 +95,16 @@ class PaginationMixin:
         offset = args.get('offset')
         sorting_str = args.get('order_by')
 
-        order_clauses = self.parse_order_clauses(sorting_str)
+        if query is None:
+            order_clauses = self.parse_order_clauses(sorting_str)
 
-        query = self.BaseEntity.query
-        query = query.filter(*extra_filters)
+            query = self.BaseEntity.query
+            query = query.filter(*extra_filters)
 
-        if order_clauses:
-            query = query.order_by(*order_clauses)
-        else:
-            query = query.order_by(*default_order_clauses)
+            if order_clauses:
+                query = query.order_by(*order_clauses)
+            else:
+                query = query.order_by(*default_order_clauses)
 
         if size:
             start = offset + size * (page - 1)

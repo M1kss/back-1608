@@ -2,7 +2,7 @@ from datetime import datetime
 from functools import wraps
 
 from flask_restplus import Resource, inputs
-from ip_app import api, check_last_seen
+from ip_app import api, check_last_seen, add_progress_percent
 from ip_app.models import User, CourseApplication, Course
 from flask import request, g
 from ip_app.constants import roles
@@ -19,7 +19,8 @@ usr_nsp = api.namespace('Users', path='/users', description='Operations related 
 crs_nsp = api.namespace('Courses', path='/courses', description='Operations related to courses')
 vds_nsp = api.namespace('Videos', path='/videos', description='Operations related to videos')
 pmt_nsp = api.namespace('Payments', path='/payments', description='Operations related to payments')
-stc_nsp = api.namespace('Statistics', path='/statistics', description='Operations related to sales and users statistics')
+stc_nsp = api.namespace('Statistics', path='/statistics',
+                        description='Operations related to sales and users statistics')
 otr_nsp = api.namespace('Other', path='/other', description='Other operations')
 
 pagination_parser = api.parser()
@@ -48,7 +49,9 @@ def role_required(role_id=len(roles) - 1):
                 api.abort(403, 'Access denied')
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -64,6 +67,7 @@ class PwdAuth(Resource):
     """
     Authorization via login and password
     """
+
     @api.response(403, 'Invalid credentials')
     @api.marshal_with(user_model_with_token)
     @api.expect(credentials_model)
@@ -145,6 +149,7 @@ class CourseApplicationItem(Resource):
     """
     Course application
     """
+
     @api.response(403, 'Access denied')
     @role_required(0)
     def delete(self, app_id):
@@ -160,6 +165,7 @@ class UserItem(Resource):
     """
     User
     """
+
     @api.marshal_with(user_model_base)
     @api.expect(user_model_patch)
     @api.response(403, 'Access denied')
@@ -188,6 +194,7 @@ class RegistrationInit(Resource):
     """
     First stage of user registration
     """
+
     @api.expect(first_step_registration_model)
     @api.response(409, 'Email is used')
     def post(self):
@@ -201,6 +208,8 @@ class RegistrationInit(Resource):
 
 registration_user_parser = api.parser()
 registration_user_parser.add_argument('hash', help='Unique registration user hash')
+
+
 # TODO API for sending email with hash
 
 
@@ -209,6 +218,7 @@ class CheckUser(Resource):
     """
     Check user registration hash
     """
+
     @api.expect(registration_user_parser)
     @api.marshal_with(first_step_registration_model)
     @api.response(404, 'No user found')
@@ -225,6 +235,7 @@ class CurrentUser(Resource):
     """
     Current user info
     """
+
     @api.marshal_with(user_model_base)
     @role_required()
     def get(self):
@@ -306,6 +317,7 @@ class CourseItem(Resource):
     """
     Information about a single course
     """
+
     @api.marshal_with(course_landing_model)
     @api.response(404, 'Course does not exist')
     @api.doc(security=None)
@@ -346,6 +358,7 @@ class FullCourseItem(Resource):
     """
     Complete information about a single course
     """
+
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Course does not exist')
@@ -372,8 +385,9 @@ class AvailableCourseCollection(Resource, PaginationMixin):
         Get courses available to the current user
         """
         # TODO: return pagination as query and add percent completed, etc.
-        return self.paginate(pagination_parser.parse_args(),
-                             extra_filters=services.get_available_courses_filters_for_student(g.current_user))
+        return add_progress_percent(self.paginate(pagination_parser.parse_args(),
+                                                  query=services.get_available_courses_as_query_for_student(
+                                                      g.current_user)))
 
 
 @crs_nsp.route('/available/<int:course_id>')
@@ -381,6 +395,7 @@ class AvailableCourseItem(Resource):
     """
     Courses available to the current user
     """
+
     @api.marshal_with(available_course_with_video_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Course does not exist')
@@ -445,6 +460,7 @@ class ContactsInfo(Resource):
     """
     Data for contacts info
     """
+
     @api.marshal_with(contacts_info_model)
     @api.doc(security=None)
     def get(self):
@@ -469,6 +485,7 @@ class LegalInfo(Resource):
     """
     Legal info
     """
+
     @api.marshal_with(legal_info_model)
     @api.doc(security=None)
     def get(self):
@@ -493,6 +510,7 @@ class Statistics(Resource):
     """
     Sales and users statistics
     """
+
     @api.marshal_with(statistics_model)
     @api.response(403, 'Access denied')
     @role_required(0)

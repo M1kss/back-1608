@@ -166,8 +166,8 @@ def get_course_ids_available_for_student(user):
     ))
 
 
-def get_available_courses_filters_for_student(user):
-    #FIXME
+def get_available_courses_as_query_for_student(user):
+    # FIXME
     available_course_ids = get_course_ids_available_for_student(user)
     course_track_items = session.query(
         Course, CourseProgressTracking
@@ -204,15 +204,16 @@ def get_video_by_id(video_id):
     return Video.query.get_or_404(video_id)
 
 
+def add_progress_percent(progress_list):
+    return [setattr(obj, 'percent_completed', None if obj_progress is None else obj_progress.progress_percent
+                    ) or obj
+            for obj, obj_progress in progress_list]
+
+
 def get_course_by_id_if_available(course_id, user):
     course = get_course_by_id(course_id)
-    course.available_videos = [setattr(video,
-                                       'percent_completed',
-                                       None if video_progress is None
-                                       else video_progress.progress_percent
-                                       ) or video
-                               for video, video_progress in
-                               get_available_videos_by_student_and_course_with_progress(user, course_id)]
+    course.available_videos = add_progress_percent(
+        get_available_videos_by_student_and_course_with_progress(user, course_id))
 
     course.video_count = len(course.videos)
     if course.available_videos:
@@ -359,9 +360,9 @@ def create_access_items(course_product, user_id): \
                    user_id=user_id,
                    begin_date=db.func.now()) for video in course_videos
             if not Access.query.filter_by(
-                video_id=video.video_id,
-                user_id=user_id,
-            ).one_or_none()]
+            video_id=video.video_id,
+            user_id=user_id,
+        ).one_or_none()]
 
 
 def grant_access_for_payed_order(order_id):
