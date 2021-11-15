@@ -100,6 +100,7 @@ class UserCollection(Resource, PaginationMixin):
         """
         Get multiple users
         """
+        # TODO Sort users
         return self.paginate(users_parser.parse_args(),
                              extra_filters=services.get_multiple_users_filters_for_current_user(g.current_user))
 
@@ -132,6 +133,7 @@ class CourseApplicationCollection(Resource, PaginationMixin):
         """
         Get course applications
         """
+        # TODO Sort users
         args = applications_parser.parse_args()
         result = self.paginate(args,
                                extra_filters=services.get_course_applications_filters(args))

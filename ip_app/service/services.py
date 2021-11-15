@@ -147,19 +147,37 @@ def get_course_by_id(course_id):
 
 def get_course_ids_available_for_student(user):
     return list(*zip(
-        *session.query(Course.course_id.distinct())
-            .join(Video, Course.videos)
-            .join(Access, Access.video_id == Video.video_id)
-            .filter(Access.user_id == user.user_id,
-                    Access.begin_date <= db.func.now(),
-                    or_(Access.end_date >= db.func.now(),
-                        Access.end_date.is_(None))
-                    ).all()
+        *session.query(
+            Course.course_id.distinct()
+        ).join(
+            Video,
+            Course.videos
+        ).join(
+            Access,
+            Access.video_id == Video.video_id
+        ).filter(
+            Access.user_id == user.user_id,
+            Access.begin_date <= db.func.now(),
+            or_(
+                Access.end_date >= db.func.now(),
+                Access.end_date.is_(None)
+            )
+        ).all()
     ))
 
 
 def get_available_courses_filters_for_student(user):
-    return (Course.course_id.in_(get_course_ids_available_for_student(user)),)
+    available_course_ids = get_course_ids_available_for_student(user)
+    course_track_items = session.query(Course, CourseProgressTracking).filter(
+        Course.course_id.in_(available_course_ids)
+    ).join(
+        CourseProgressTracking,
+        CourseProgressTracking.course_id == Course.course_id,
+        CourseProgressTracking.user_id == user.user_id
+    ).all()
+    for course, course_progress in course_track_items:
+        course.progress = course_progress.progress_percent
+    return course_track_items
 
 
 def get_available_videos_by_student_and_course_with_progress(user, course_id):
