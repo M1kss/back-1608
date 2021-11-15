@@ -106,6 +106,7 @@ class UserCollection(Resource, PaginationMixin):
         """
         # TODO Sort users
         return self.paginate(users_parser.parse_args(),
+                             default_order_clauses=(User.registration_date.desc(),),
                              extra_filters=services.get_multiple_users_filters_for_current_user(g.current_user))
 
 
