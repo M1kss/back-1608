@@ -206,7 +206,11 @@ def get_video_by_id(video_id):
 
 def get_course_by_id_if_available(course_id, user):
     course = get_course_by_id(course_id)
-    course.available_videos = [setattr(video, 'progress', video_progress) or video
+    course.available_videos = [setattr(video,
+                                       'percent_completed',
+                                       None if video_progress is None
+                                       else video_progress.progress_percent
+                                       ) or video
                                for video, video_progress in
                                get_available_videos_by_student_and_course_with_progress(user, course_id)]
 

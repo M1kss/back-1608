@@ -123,7 +123,7 @@ video_progress_model = api.model('Video progress', {
 })
 
 video_with_progress_model = api.clone('Video model with progress', video_model, {
-    'progress': fields.Nested(video_progress_model, readonly=True),
+    'percent_completed': fields.Integer(readonly=True),
 })
 
 available_course_with_video_model = api.clone('Course model with videos', course_base_model, {
