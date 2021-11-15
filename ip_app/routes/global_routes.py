@@ -454,7 +454,7 @@ class PaymentCallback(Resource):
         """
         Post video tracking info
         """
-        video_progress = services.update_video_progress(g.curent_user, request.get_json())
+        video_progress = services.update_video_progress(g.current_user, request.get_json())
         return video_progress
 
 
