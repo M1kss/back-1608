@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 from ip_app import session, db, VideoProgressTracking, CourseProgressTracking
 from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct, \
@@ -168,13 +168,14 @@ def get_course_ids_available_for_student(user):
 
 def get_available_courses_filters_for_student(user):
     available_course_ids = get_course_ids_available_for_student(user)
-    print(available_course_ids)
-    course_track_items = session.query(Course, CourseProgressTracking).filter(
+    course_track_items = session.query(
+        Course, CourseProgressTracking
+    ).filter(
         Course.course_id.in_(available_course_ids)
     ).join(
         CourseProgressTracking,
-        CourseProgressTracking.course_id == Course.course_id,
-        CourseProgressTracking.user_id == user.user_id,
+        and_(CourseProgressTracking.course_id == Course.course_id,
+             CourseProgressTracking.user_id == user.user_id),
         isouter=True
     ).all()
     for course, course_progress in course_track_items:
