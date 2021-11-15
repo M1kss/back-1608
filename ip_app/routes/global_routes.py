@@ -448,6 +448,7 @@ class PaymentCallback(Resource):
 class PaymentCallback(Resource):
     @api.response(404, 'Video not found')
     @api.marshal_with(video_progress_model)
+    @api.expect(video_progress_model)
     @role_required()
     def post(self):
         """
