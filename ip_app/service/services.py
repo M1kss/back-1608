@@ -167,7 +167,6 @@ def get_course_ids_available_for_student(user):
 
 
 def get_available_courses_as_query_for_student(user):
-    # FIXME
     available_course_ids = get_course_ids_available_for_student(user)
     course_track_items = session.query(
         Course, CourseProgressTracking

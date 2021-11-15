@@ -137,9 +137,9 @@ class CourseApplicationCollection(Resource, PaginationMixin):
         """
         Get course applications
         """
-        # TODO Sort users
         args = applications_parser.parse_args()
         result = self.paginate(args,
+                               default_order_clauses=(CourseApplication.application_date.desc_(),),
                                extra_filters=services.get_course_applications_filters(args))
         return result
 
@@ -384,7 +384,7 @@ class AvailableCourseCollection(Resource, PaginationMixin):
         """
         Get courses available to the current user
         """
-        # TODO: return pagination as query and add percent completed, etc.
+        # TODO: sorting
         return add_progress_percent(self.paginate(pagination_parser.parse_args(),
                                                   query=services.get_available_courses_as_query_for_student(
                                                       g.current_user)))
