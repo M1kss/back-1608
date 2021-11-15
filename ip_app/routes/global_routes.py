@@ -139,7 +139,7 @@ class CourseApplicationCollection(Resource, PaginationMixin):
         """
         args = applications_parser.parse_args()
         result = self.paginate(args,
-                               default_order_clauses=(CourseApplication.application_date.desc_(),),
+                               default_order_clauses=(CourseApplication.application_date.desc(),),
                                extra_filters=services.get_course_applications_filters(args))
         return result
 
