@@ -428,10 +428,10 @@ def update_course_progress_video_count(course_progress):
 
 
 def update_course_progress(course_progress):
-    course_progress.progress_percent = sum(
+    course_progress.progress_percent = round(sum(
         video_progress.progress_percent
         for video_progress in course_progress.video_progress_items
-    ) / course_progress.video_count
+    ) / course_progress.video_count)
 
 
 def round_progress_percent(progress):
