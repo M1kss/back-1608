@@ -281,7 +281,7 @@ def create_registration_hash_and_send_email(data):
 
 def create_payment_link(order_id):
     # TODO: acquiring
-    return 'http://79.98.29.212/api/v1/payments/callback/{}'.format(order_id)
+    return '/api/v1/payments/callback/{}'.format(order_id)
 
 
 def get_order(order_id):
