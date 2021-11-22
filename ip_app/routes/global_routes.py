@@ -407,7 +407,7 @@ class AvailableCourseItem(Resource):
         """
         ok, course = services.get_course_by_id_if_available(course_id, g.current_user)
         if not ok:
-            return 403, 'Access denied'
+            api.abort(403, 'Access denied')
         else:
             return course
 
