@@ -204,7 +204,7 @@ def get_video_by_id(video_id):
 
 
 def add_progress_percent(progress_list):
-    return [setattr(obj, 'percent_completed', None if obj_progress is None else obj_progress.progress_percent
+    return [setattr(obj, 'progress_percent', None if obj_progress is None else obj_progress.progress_percent
                     ) or obj
             for obj, obj_progress in progress_list]
 
@@ -413,7 +413,6 @@ def update_video_progress(user, data):
     video_progress.progress_percent = round_progress_percent(data['progress_percent'])
     update_course_progress(video_progress.course_progress)
     session.commit()
-    setattr(video_progress, 'course_progress_percent', video_progress.course_progress.progress_percent)
     return video_progress
 
 

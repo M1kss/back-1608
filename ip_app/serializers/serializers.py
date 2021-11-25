@@ -89,9 +89,9 @@ course_base_model = api.model('Course base model', {
     'author_name': fields.String,
 })
 
-available_course_model = api.clone('Avalilable course model', course_base_model, {
-    'percent_completed': fields.Integer,
-})
+progress_percent_dict = {'progress_percent': fields.Integer(readonly=True)}
+
+available_course_model = api.clone('Avalilable course model', course_base_model, progress_percent_dict)
 
 q_and_a_model = api.model('Q&A model', {
     'question': fields.String,
@@ -116,16 +116,18 @@ patch_video_model = api.clone('Video model with id', video_base_model, {
     'url': fields.String,
 })
 
+course_progress_model = api.model(
+    'Course progress', progress_percent_dict
+)
 video_progress_model = api.model('Video progress', {
     'video_progress_id': fields.Integer(readonly=True),
     'video_id': fields.Integer(required=True),
     'progress_percent': fields.Integer(required=True),
-    'course_progress_percent': fields.Integer(readonly=True)
+    'course_progress': fields.Nested(course_progress_model,
+                                     readonly=True)
 })
 
-video_with_progress_model = api.clone('Video model with progress', video_model, {
-    'percent_completed': fields.Integer(readonly=True),
-})
+video_with_progress_model = api.clone('Video model with progress', video_model, progress_percent_dict)
 
 available_course_with_video_model = api.clone('Course model with videos', course_base_model, {
     'available_videos': fields.List(fields.Nested(video_with_progress_model)),
