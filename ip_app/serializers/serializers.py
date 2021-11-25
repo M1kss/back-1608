@@ -119,7 +119,8 @@ patch_video_model = api.clone('Video model with id', video_base_model, {
 video_progress_model = api.model('Video progress', {
     'video_progress_id': fields.Integer(readonly=True),
     'video_id': fields.Integer(required=True),
-    'progress_percent': fields.Integer(required=True)
+    'progress_percent': fields.Integer(required=True),
+    'course_progress_percent': fields.Integer(readonly=True)
 })
 
 video_with_progress_model = api.clone('Video model with progress', video_model, {

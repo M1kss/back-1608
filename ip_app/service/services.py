@@ -413,6 +413,7 @@ def update_video_progress(user, data):
     video_progress.progress_percent = round_progress_percent(data['progress_percent'])
     update_course_progress(video_progress.course_progress)
     session.commit()
+    setattr(video_progress, 'course_progress_percent', video_progress.course_progress.progress_percent)
     return video_progress
 
 
