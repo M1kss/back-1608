@@ -369,7 +369,7 @@ def create_access_items(course_product, user_id): \
 
 
 def get_timing(items, interval):
-    begin_dates = [db.func.now() + timedelta(minutes=interval * i) for i in range(len(items))]
+    begin_dates = [datetime.now() + timedelta(minutes=interval * i) for i in range(len(items))]
     return begin_dates, begin_dates[-1] + timedelta(days=90)
 
 
