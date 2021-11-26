@@ -317,13 +317,6 @@ def create_order(user, data):
     course_products = [CourseProduct.query.get_or_404(p_id) for p_id in course_product_ids]
     service_products = [ServiceProduct.query.get_or_404(p_id) for p_id in service_product_ids]
 
-    purchased_course_product_ids = check_purchased_course_product_ids(user, course_product_ids)
-    purchased_service_product_ids = check_purchased_service_product_ids(user, course_product_ids)
-    if len(purchased_course_product_ids) + len(purchased_service_product_ids) != 0:
-        return False, (403, 'One or more products already purchased,'
-                            'course: {}, service: {}'.format(purchased_course_product_ids,
-                                                             purchased_service_product_ids))
-
     data['course_product_items'] = [OrderCourseProductItem(
         price=pr.price,
         course_product_id=pr.course_product_id
@@ -376,6 +369,17 @@ def get_timing(items, interval):
 def grant_access_for_payed_order(order_id):
     order = get_order(order_id)
     access_items = []
+    purchased_course_product_ids = check_purchased_course_product_ids(order.user,
+                                                                      [x.course_product_id
+                                                                       for x in order.course_product_items])
+    purchased_service_product_ids = check_purchased_service_product_ids(order.user,
+                                                                        [x.service_product_id
+                                                                         for x in order.service_product_items])
+    if len(purchased_course_product_ids) + len(purchased_service_product_ids) != 0:
+        return False, (403, 'One or more products already purchased,'
+                            'course: {}, service: {}'.format(purchased_course_product_ids,
+                                                             purchased_service_product_ids))
+
     for course_product_item in order.course_product_items:
         access_items += create_access_items(course_product_item.course_product,
                                             order.user_id)
@@ -389,6 +393,7 @@ def grant_access_for_payed_order(order_id):
             get_course_progress(order.user_id, course_product_item.course_product.course_id)
         )
     session.commit()
+    return True, {}
 
 
 def get_course_progress(user_id, course_id):

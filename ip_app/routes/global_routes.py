@@ -440,8 +440,11 @@ class PaymentCallback(Resource):
         """
         Payment Callback
         """
-        services.grant_access_for_payed_order(order_id)
-        return 200, {}
+        ok, response = services.grant_access_for_payed_order(order_id)
+        if not ok:
+            status, reason = response
+            api.abort(status, reason)
+        return response
 
 
 @vds_nsp.route('/callback')
