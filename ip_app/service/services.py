@@ -345,8 +345,7 @@ def create_order(user, data):
     return True, order
 
 
-def create_access_items(course_product, user_id): \
-        # TODO: begin_date
+def create_access_items(course_product, user_id):
     course_videos = course_product.course.videos
     interval = 2
     begin_date_list, end_date = get_timing(course_videos, interval)
