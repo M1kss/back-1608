@@ -389,9 +389,9 @@ def grant_access_for_payed_order(order_id):
     session.commit()
 
     for course_product_item in order.course_product_items:
-        update_course_progress_video_count(
-            get_course_progress(order.user_id, course_product_item.course_product.course_id)
-        )
+        course_progress = get_course_progress(order.user_id, course_product_item.course_product.course_id)
+        if course_progress is not None:
+            update_course_progress_video_count(course_progress)
     session.commit()
     return True, {}
 
