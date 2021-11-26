@@ -354,7 +354,7 @@ def create_access_items(course_product, user_id): \
                    user_id=user_id,
                    begin_date=b_date,
                    end_date=end_date)
-            for b_date, video in zip(course_videos, begin_date_list)
+            for b_date, video in zip(begin_date_list, course_videos)
             if not Access.query.filter_by(
             video_id=video.video_id,
             user_id=user_id,
