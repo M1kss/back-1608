@@ -294,7 +294,7 @@ def get_user_product_ids(user, for_what):
     product_items = '{}_product_items'.format(for_what)
     return set(
         getattr(product_item, product_id)
-        for order in user.orders
+        for order in user.orders if order.status == 'PAYED'
         for product_item in getattr(order, product_items)
     )
 
