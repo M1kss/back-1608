@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 from sqlalchemy import or_, and_
@@ -355,20 +355,30 @@ def create_order(user, data):
 def create_access_items(course_product, user_id): \
         # TODO: begin_date
     course_videos = course_product.course.videos
+    interval = 2
+    begin_date_list, end_date = get_timing(course_videos, interval)
     return [Access(video_id=video.video_id,
                    user_id=user_id,
-                   begin_date=db.func.now()) for video in course_videos
+                   begin_date=b_date,
+                   end_date=end_date)
+            for b_date, video in zip(course_videos, begin_date_list)
             if not Access.query.filter_by(
             video_id=video.video_id,
             user_id=user_id,
         ).one_or_none()]
 
 
+def get_timing(items, interval):
+    begin_dates = [db.func.now() + timedelta(minutes=interval * i) for i in range(len(items))]
+    return begin_dates, begin_dates[-1] + timedelta(days=90)
+
+
 def grant_access_for_payed_order(order_id):
     order = get_order(order_id)
     access_items = []
     for course_product_item in order.course_product_items:
-        access_items += create_access_items(course_product_item.course_product, order.user_id)
+        access_items += create_access_items(course_product_item.course_product,
+                                            order.user_id)
 
     session.add_all(access_items)
     order.status = 'PAYED'
