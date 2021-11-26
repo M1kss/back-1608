@@ -383,7 +383,7 @@ def grant_access_for_payed_order(order_id):
     for course_product_item in order.course_product_items:
         access_items += create_access_items(course_product_item.course_product,
                                             order.user_id)
-
+    # TODO deactivate link + remove existing orders for the same course product/service product
     session.add_all(access_items)
     order.status = 'PAYED'
     session.commit()
