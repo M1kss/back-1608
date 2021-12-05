@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from functools import reduce
 from uuid import uuid4
 
 from sqlalchemy import or_, and_
@@ -132,7 +131,8 @@ def get_multiple_users_with_course_for_current_user(user):
     ).join(
         Course,
         Course.course_id == Video.course_id
-    ).order_by(User.registration_date.desc(), Access.end_date.desc())
+    ).order_by(User.registration_date.desc(),
+               Access.end_date.desc())
 
 
 def email_exists(email):
@@ -505,7 +505,6 @@ def get_chats_for_teacher(current_user):
         result.append({
             'course': course_chats[0].course,
             'chats': course_chats,
-            'chats_count': len(course_chats)
         })
     return result
 

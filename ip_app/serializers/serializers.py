@@ -299,7 +299,6 @@ chat_with_student_model = api.clone('Chat model with student', chat_base_model, 
 })
 chat_teacher_model = api.model('Chat teacher model', {
     'course': fields.Nested(course_base_model),
-    'chats_count': fields.Integer,
     'chats': fields.List(fields.Nested(chat_with_student_model))
 })
 
