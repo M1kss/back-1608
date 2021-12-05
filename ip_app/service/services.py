@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
+from functools import reduce
 from uuid import uuid4
 
 from sqlalchemy import or_, and_
 
-from ip_app import session, db, VideoProgressTracking, CourseProgressTracking
+from ip_app import session, db, ChatLine, Chat, hw_statuses
 from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct, \
-    UserRegistration, OrderCourseProductItem, OrderServiceProductItem, Order
+    UserRegistration, OrderCourseProductItem, OrderServiceProductItem, Order, VideoProgressTracking, \
+    CourseProgressTracking, ChatThread
 
 
 def get_user(value, by='id'):
@@ -118,6 +120,21 @@ def get_multiple_users_filters_for_current_user(user):
         raise AssertionError
 
 
+def get_multiple_users_with_course_for_current_user(user):
+    return [setattr(u, 'course', course) or u for course, u in session.query(User, Course).join(
+        Access,
+        Access.user_id == User.user_id
+    ).filter(
+        *get_current_active_filters()
+    ).join(
+        Video,
+        Video.video_id == Access.video_id
+    ).join(
+        Course,
+        Course.course_id == Video.course_id
+    ).all()]
+
+
 def email_exists(email):
     return User.query.filter_by(email=email).one_or_none()
 
@@ -145,6 +162,14 @@ def get_course_by_id(course_id):
     return Course.query.get_or_404(course_id)
 
 
+def get_current_active_filters():
+    return (Access.begin_date <= db.func.now(),
+            or_(
+                Access.end_date >= db.func.now(),
+                Access.end_date.is_(None)
+            ))
+
+
 def get_course_ids_available_for_student(user):
     return list(*zip(
         *session.query(
@@ -157,11 +182,7 @@ def get_course_ids_available_for_student(user):
             Access.video_id == Video.video_id
         ).filter(
             Access.user_id == user.user_id,
-            Access.begin_date <= db.func.now(),
-            or_(
-                Access.end_date >= db.func.now(),
-                Access.end_date.is_(None)
-            )
+            *get_current_active_filters()
         ).all()
     ))
 
@@ -189,8 +210,7 @@ def get_available_videos_by_student_and_course_with_progress(user, course_id):
         Access.video_id == Video.video_id
     ).filter(
         Access.user_id == user.user_id,
-        Access.begin_date <= db.func.now(),
-        or_(Access.end_date >= db.func.now(), Access.end_date.is_(None))
+        *get_current_active_filters()
     ).join(
         VideoProgressTracking,
         and_(VideoProgressTracking.video_id == Video.video_id,
@@ -231,8 +251,10 @@ def create_new_course(data):
     videos = data.pop('videos')
     course_products = data.pop('course_products')
     service_products = data.pop('service_products')
-
+    teachers = [get_user(user_id) for user_id
+                in data.pop('teacher_ids')]
     course = Course(**data,
+                    teachers=teachers,
                     course_products=[CourseProduct(**course_product_data) for course_product_data in course_products],
                     service_products=[ServiceProduct(**service_product_data) for service_product_data in
                                       service_products],
@@ -246,6 +268,8 @@ def create_new_course(data):
 def patch_course(course_id, data):
     course = get_course_by_id(course_id)
     videos = data.pop('videos', [])
+    course.teachers = [get_user(user_id) for user_id
+                       in data.pop('teacher_ids', [])]
     new_landing_info = data.pop('landing_info', None)
     if new_landing_info is not None:
         land_info = {}
@@ -424,8 +448,17 @@ def update_video_progress(user, data):
             course_progress=course_progress
         )
         session.add(video_progress)
-    video_progress.progress_percent = round_progress_percent(data['progress_percent'])
-    update_course_progress(video_progress.course_progress)
+    new_progress = round_progress_percent(data['progress_percent'])
+    old_progress = video_progress.progress_percent
+    if old_progress is not None and new_progress > old_progress:
+        video_progress.progress_percent = new_progress
+        update_course_progress(video_progress.course_progress)
+        if video_progress.progress_percent == 100:
+            send_hw(user.user_id,
+                    course_id=video.course_id,
+                    video_id=video.video_id,
+                    homework=video.homework
+                    )
     session.commit()
     return video_progress
 
@@ -450,3 +483,132 @@ def update_course_progress(course_progress):
 
 def round_progress_percent(progress):
     return 100 if progress >= 95 else progress
+
+
+def get_chat_thread(chat_thread_id):
+    return ChatThread.query.get_or_404(chat_thread_id)
+
+
+def get_chats_for_student(current_user):
+    return Chat.query.filter(
+        Chat.student_id == current_user.user_id
+    ).all()
+
+
+def get_chats_for_teacher(current_user):
+    chats = Chat.query.filter(
+        Chat.teacher_id == current_user.user_id
+    ).all()
+    result = []
+    for course_id in set(chat.course_id for chat in chats):
+        course_chats = [x for x in chats if x.course_id == course_id]
+        result.append({
+            'course': course_chats[0].course,
+            'chats': course_chats,
+            'chats_count': len(course_chats)
+        })
+    return result
+
+
+def update_chat_and_thread_read_status(chat_thread, sender, is_new_message=False):
+    update_read_status(chat_thread, sender, is_new_message)
+    update_read_status(chat_thread.chat, sender, is_new_message)
+
+
+def update_read_status(obj, sender, is_new_message=False):
+    if sender == 'TEACHER':
+        obj.teacher_read = True
+        if is_new_message:
+            obj.student_read = False
+    if sender == 'STUDENT':
+        obj.student_read = True
+        if is_new_message:
+            obj.teacher_read = False
+
+
+def get_chat_items_by_chat_id(current_user, chat_id, sender):
+    chat = Chat.query.get_or_404(chat_id)
+    if check_sender(current_user=current_user,
+                    chat=chat,
+                    sender=sender):
+        return False, (403, 'Access denied')
+    # Don't update read status if admin is watching...
+    if sender != 'TEACHER' or current_user.role != 'ADMIN':
+        update_read_status(chat, sender, False)
+        for chat_thread in chat.chat_threads:
+            update_read_status(chat_thread, sender, False)
+            if chat_thread.chat_lines[-1].sender != sender:
+                chat_thread.chat_lines[-1].is_read = True
+        session.commit()
+    return chat.chat_threads
+
+
+def check_teacher_able_to_send(current_user, chat):
+    if current_user.role == 'ADMIN':
+        return True
+    return current_user.user_id in {x.user_id for x in chat.course.teachers}
+
+
+def check_sender(current_user, chat, sender):
+    if sender == 'TEACHER':
+        result = check_teacher_able_to_send(current_user, chat)
+    elif sender == 'STUDENT':
+        result = current_user.user_id == chat.student_id
+    else:
+        result = False
+    return result
+
+
+def add_chat_line(current_user, body):
+    chat_thread = get_chat_thread(body.pop('chat_thread_id'))
+    sender = body['sender']
+    if chat_thread.chat_lines[-1].sender == sender or \
+            not check_sender(current_user=current_user,
+                             chat=chat_thread.chat,
+                             sender=sender
+                             ):
+        return False, (403, 'Access denied')
+    message = body['message']
+    chat_line = create_chat_line(chat_thread, sender, message)
+    chat_thread.chat.last_message_date = datetime.now()
+    update_chat_and_thread_read_status(chat_thread, sender, True)
+    session.commit()
+    return True, chat_line
+
+
+def create_chat_line(chat_thread, sender, message):
+    chat_line = ChatLine(
+        chat_thread_id=chat_thread.chat_thread_id,
+        sender=sender,
+        message=message
+    )
+    session.add(chat_line)
+    return chat_line
+
+
+def send_hw(user_id, course_id, video_id, homework):
+    result = session.query(Chat, ChatThread).filter(
+        Chat.student_id == user_id,
+        Chat.course_id == course_id
+    ).join(ChatThread, Chat.chat_threads).filter(
+        ChatThread.video_id == video_id
+    ).one_or_none()
+    if result is None:
+        chat = Chat(
+            student_id=user_id,
+            course_id=course_id
+        )
+        session.add(chat)
+        chat_thread = None
+    else:
+        chat, chat_thread = result
+    if chat_thread is None:
+        chat_thread = ChatThread(
+            chat_id=chat.chat_id,
+            video_id=video_id,
+            hw_status=hw_statuses[0]
+        )
+        session.add(chat_thread)
+    chat_line = create_chat_line(chat_thread, 'TEACHER', homework)
+    session.commit()
+    return chat_line

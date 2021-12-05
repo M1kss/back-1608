@@ -1,23 +1,24 @@
-from datetime import datetime
 from functools import wraps
 
 from flask_restplus import Resource, inputs
-from ip_app import api, check_last_seen, add_progress_percent
+from ip_app import api, check_last_seen, add_progress_percent, get_chat_items_by_chat_id
 from ip_app.models import User, CourseApplication, Course
 from flask import request, g
 from ip_app.constants import roles
 from ip_app.service import services
 from ip_app.serializers.serializers import user_model_with_token, user_model_base, credentials_model, \
-    user_model_with_credentials, course_base_model, payment_link_model, cart_model, course_landing_model, \
+    user_model_with_credentials, payment_link_model, cart_model, course_landing_model, \
     available_course_model, available_course_with_video_model, course_full_model, course_post_model, \
     contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model, \
-    user_model_patch, course_patch_model, video_progress_model
+    user_model_patch, course_patch_model, video_progress_model, chat_line_model, chat_with_teacher_read_model, \
+    chat_thread_for_student_model, chat_teacher_model, chat_thread_for_teacher_model, user_model_with_course
 from ip_app.utils import PaginationMixin
 
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
 usr_nsp = api.namespace('Users', path='/users', description='Operations related to user accounts')
 crs_nsp = api.namespace('Courses', path='/courses', description='Operations related to courses')
 vds_nsp = api.namespace('Videos', path='/videos', description='Operations related to videos')
+cht_nsp = api.namespace('Homework', path='/chat', description='Operations related to homework')
 pmt_nsp = api.namespace('Payments', path='/payments', description='Operations related to payments')
 stc_nsp = api.namespace('Statistics', path='/statistics',
                         description='Operations related to sales and users statistics')
@@ -88,7 +89,7 @@ class PwdAuth(Resource):
 
 users_parser = pagination_parser.copy()
 
-
+#TODO add table type to parser
 @usr_nsp.route('')
 class UserCollection(Resource, PaginationMixin):
     """
@@ -104,10 +105,30 @@ class UserCollection(Resource, PaginationMixin):
         """
         Get multiple users
         """
-        # TODO Sort users
         return self.paginate(users_parser.parse_args(),
                              default_order_clauses=(User.registration_date.desc(),),
                              extra_filters=services.get_multiple_users_filters_for_current_user(g.current_user))
+
+
+@usr_nsp.route('/active')
+class ActiveUserCollection(Resource, PaginationMixin):
+    """
+    Multiple users info
+    """
+    BaseEntity = User
+
+    @api.marshal_list_with(user_model_with_course)
+    @api.expect(users_parser)
+    @api.response(403, 'Access denied')
+    @role_required(1)
+    def get(self):
+        """
+        Get multiple users with active course
+        """
+        print(services.get_multiple_users_with_course_for_current_user(g.current_user))
+        return self.paginate(users_parser.parse_args(),
+                             default_order_clauses=(User.registration_date.desc(),),
+                             query=services.get_multiple_users_with_course_for_current_user(g.current_user))
 
 
 applications_parser = pagination_parser.copy()
@@ -410,6 +431,78 @@ class AvailableCourseItem(Resource):
             api.abort(403, 'Access denied')
         else:
             return course
+
+
+@cht_nsp.route('')
+class ChatsCollection(Resource):
+    @role_required()
+    @api.marshal_list_with(chat_with_teacher_read_model)
+    def get(self):
+        """
+        Get chats for user
+        """
+        return services.get_chats_for_student(g.current_user)
+
+    @api.expect(chat_line_model)
+    @api.response(404, 'Chat thread not found')
+    @api.response(403, 'Access denied')
+    @api.marshal_with(chat_line_model)
+    @role_required()
+    def post(self):
+        """
+        Send message
+        """
+        ok, message = services.add_chat_line(g.current_user,
+                                             request.get_json())
+        if not ok:
+            status, reason = message
+            api.abort(status, reason)
+        return message
+
+
+@cht_nsp.route('/<int:chat_id>')
+class ChatItem(Resource):
+    @role_required()
+    @api.marshal_list_with(chat_thread_for_student_model)
+    @api.response(404, 'Chat not found')
+    @api.response(403, 'Access denied')
+    def get(self, chat_id):
+        """
+        Get chat threads by chat_id
+        """
+        ok, chat_items = get_chat_items_by_chat_id(g.current_user, chat_id, 'STUDENT')
+        if not ok:
+            status, response = chat_items
+            api.abort(status, response)
+        return chat_items
+
+
+@cht_nsp.route('/teacher')
+class ChatsTeacherCollection(Resource):
+    @role_required(1)
+    @api.marshal_list_with(chat_teacher_model)
+    def get(self):
+        """
+        Get chats for teacher
+        """
+        return services.get_chats_for_teacher(g.current_user)
+
+
+@cht_nsp.route('/teacher/<int:chat_id>')
+class ChatTeacherItem(Resource):
+    @role_required(1)
+    @api.marshal_list_with(chat_thread_for_teacher_model)
+    @api.response(404, 'Chat not found')
+    @api.response(403, 'Access denied')
+    def get(self, chat_id):
+        """
+        Get chat threads by chat_id for teacher
+        """
+        ok, chat_items = get_chat_items_by_chat_id(g.current_user, chat_id, 'TEACHER')
+        if not ok:
+            status, response = chat_items
+            api.abort(status, response)
+        return chat_items
 
 
 @pmt_nsp.route('')

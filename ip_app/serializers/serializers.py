@@ -1,7 +1,7 @@
 from flask_restplus import fields
 from ip_app import api
 from ip_app.constants import roles, user_statuses, course_statuses, video_statuses, EMAIL_REGEX, PHONE_REGEX, \
-    sex_choices
+    sex_choices, hw_statuses, sender_choices
 
 
 class Email(fields.String):
@@ -89,6 +89,10 @@ course_base_model = api.model('Course base model', {
     'author_name': fields.String,
 })
 
+user_model_with_course = api.clone('User model with course', short_user_model, {
+    'course': fields.Nested(course_base_model)
+})
+
 progress_percent_dict = {'progress_percent': fields.Integer(readonly=True)}
 
 available_course_model = api.clone('Avalilable course model', course_base_model, progress_percent_dict)
@@ -99,6 +103,7 @@ q_and_a_model = api.model('Q&A model', {
 })
 
 video_base_model = api.model('Base video model', {
+    'title': fields.String,
     'description': fields.String,
     'duration': fields.Integer(description='duration in seconds'),
     'q_and_a': fields.List(fields.Nested(q_and_a_model)),
@@ -112,7 +117,6 @@ video_model = api.clone('Video model', video_base_model, {
 
 patch_video_model = api.clone('Video model with id', video_base_model, {
     'video_id': fields.Integer(min=1, required=True),
-    'title': fields.String,
     'url': fields.String,
 })
 
@@ -204,6 +208,9 @@ course_patch_model = api.model('Course patch model', {
     'title': fields.String,
     'description': fields.String,
     'course_pic_url': fields.String,
+    'teacher_ids': fields.List(fields.Integer,
+                               required=True,
+                               min_items=1),
     'author_name': fields.String,
     'landing_info': fields.Nested(landing_info_model),
     'videos': fields.List(fields.Nested(patch_video_model), default=[])
@@ -215,6 +222,7 @@ course_post_model = api.model('Course post model', {
     'description': fields.String,
     'course_pic_url': fields.String,
     'author_name': fields.String(required=True),
+    'teacher_ids': fields.List(fields.Integer, required=True, min_items=1),
     'landing_info': fields.Nested(landing_info_model, required=True),
     'course_products': fields.List(fields.Nested(course_product_model), required=True, min_items=1),
     'service_products': fields.List(fields.Nested(service_product_model), default=[]),
@@ -264,4 +272,48 @@ course_application_model = api.model('Course application', {
     'course_id': fields.Integer(required=True),
     'is_registered': fields.Boolean(readonly=True),
     'course': fields.Nested(course_base_model, readonly=True)
+})
+
+chat_line_model = api.model('Chat line', {
+    'chat_line_id': fields.Integer(readonly=True),
+    'message': fields.String,
+    'sender': fields.String(enum=sender_choices, required=True),
+    'chat_thread_id': fields.Integer(required=True),
+    'is_read': fields.Boolean
+})
+
+chat_base_model = api.model('Chat base model', {
+    'chat_id': fields.Integer,
+    'last_message_date': fields.DateTime,
+})
+
+
+chat_with_teacher_read_model = api.clone('Chat model with teacher', chat_base_model, {
+    'course': fields.Nested(course_base_model),
+    'teacher_read': fields.Boolean
+})
+
+chat_with_student_model = api.clone('Chat model with student', chat_base_model, {
+    'student': fields.Nested(short_user_model),
+    'student_read': fields.Boolean
+})
+chat_teacher_model = api.model('Chat teacher model', {
+    'course': fields.Nested(course_base_model),
+    'chats_count': fields.Integer,
+    'chats': fields.List(fields.Nested(chat_with_student_model))
+})
+
+chat_thread_model_base = api.model('Chat thread model', {
+    'chat_thread_id': fields.Integer,
+    'chat_lines': fields.List(fields.Nested(chat_line_model)),
+    'hw_status': fields.String(enum=hw_statuses),
+    'video': fields.Nested(video_base_model)
+})
+
+chat_thread_for_student_model = api.clone('Chat thread model', chat_thread_model_base, {
+    'teacher_read': fields.Boolean
+})
+
+chat_thread_for_teacher_model = api.clone('Chat thread model', chat_thread_model_base, {
+    'student_read': fields.Boolean
 })
