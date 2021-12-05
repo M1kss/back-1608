@@ -309,10 +309,10 @@ chat_thread_model_base = api.model('Chat thread model', {
     'video': fields.Nested(video_base_model)
 })
 
-chat_thread_for_student_model = api.clone('Chat thread model', chat_thread_model_base, {
+chat_thread_for_student_model = api.clone('Chat thread student model', chat_thread_model_base, {
     'teacher_read': fields.Boolean
 })
 
-chat_thread_for_teacher_model = api.clone('Chat thread model', chat_thread_model_base, {
+chat_thread_for_teacher_model = api.clone('Chat thread teacher model', chat_thread_model_base, {
     'student_read': fields.Boolean
 })
