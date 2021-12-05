@@ -266,7 +266,7 @@ class ChatThread(db.Model):
     hw_status = db.Column(db.Enum(*hw_statuses))
     video_id = db.Column(INTEGER(unsigned=True),
                          db.ForeignKey('videos.video_id', ondelete="SET NULL"),
-                         nullable=False)
+                         )
     teacher_read = db.Column(db.Boolean, server_default='1')
     student_read = db.Column(db.Boolean, server_default='0')
     chat = db.relationship(Chat, backref=db.backref('chat_threads',
