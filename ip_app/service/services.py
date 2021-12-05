@@ -612,3 +612,8 @@ def send_hw(user_id, course_id, video_id, homework):
     chat_line = create_chat_line(chat_thread, 'TEACHER', homework)
     session.commit()
     return chat_line
+
+
+def add_course_to_user(user_course_list):
+    return [setattr(user, 'course', course) or user
+            for user, course in user_course_list]
