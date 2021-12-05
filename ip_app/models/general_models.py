@@ -236,7 +236,7 @@ class HomeWork(db.Model):
 
 
 class Chat(db.Model):
-    __tablename__ = 'hw_chat'
+    __tablename__ = 'hw_chats'
     __table_args__ = (
         db.UniqueConstraint('student_id', 'course_id',
                             name='unique_video_progress_entry'),
@@ -255,17 +255,17 @@ class Chat(db.Model):
 
 
 class ChatThread(db.Model):
-    __tablename__ = 'hw_chat_thread'
+    __tablename__ = 'hw_chat_threads'
     __table_args__ = (
         db.UniqueConstraint('chat_id', 'video_id',
                             name='unique_chat_thread_entry'),
     )
     chat_thread_id = db.Column(INTEGER(unsigned=True), primary_key=True)
     chat_id = db.Column(INTEGER(unsigned=True),
-                        db.ForeignKey('hw_chat.chat_id', ondelete="CASCADE"), nullable=False)
+                        db.ForeignKey('hw_chats.chat_id', ondelete="CASCADE"), nullable=False)
     hw_status = db.Column(db.Enum(*hw_statuses))
     video_id = db.Column(INTEGER(unsigned=True),
-                         db.ForeignKey('video.video_id', ondelete="SET NULL"),
+                         db.ForeignKey('videos.video_id', ondelete="SET NULL"),
                          nullable=False)
     teacher_read = db.Column(db.Boolean, server_default='1')
     student_read = db.Column(db.Boolean, server_default='0')
@@ -276,12 +276,12 @@ class ChatThread(db.Model):
 
 
 class ChatLine(db.Model):
-    __tablename__ = 'hw_chat_line'
+    __tablename__ = 'hw_chat_lines'
     chat_line_id = db.Column(INTEGER(unsigned=True), primary_key=True)
     message = db.Column(db.String(300))
     message_date = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     chat_thread_id = db.Column(INTEGER(unsigned=True),
-                               db.ForeignKey('hw_chat_thread.chat_thread_id', ondelete="CASCADE"), nullable=False)
+                               db.ForeignKey('hw_chat_threads.chat_thread_id', ondelete="CASCADE"), nullable=False)
     sender = db.Column(db.Enum(*sender_choices), nullable=False)
     is_read = db.Column(db.Boolean, server_default='0')
     chat_thread = db.relationship(ChatThread,
