@@ -464,7 +464,7 @@ class ChatsCollection(Resource):
 @cht_nsp.route('/<int:chat_id>')
 class ChatItem(Resource):
     @role_required()
-    @api.marshal_list_with(chat_thread_for_student_model)
+    @api.marshal_with(chat_thread_for_student_model)
     @api.response(404, 'Chat not found')
     @api.response(403, 'Access denied')
     def get(self, chat_id):
@@ -492,7 +492,7 @@ class ChatsTeacherCollection(Resource):
 @cht_nsp.route('/teacher/<int:chat_id>')
 class ChatTeacherItem(Resource):
     @role_required(1)
-    @api.marshal_list_with(chat_thread_for_teacher_model)
+    @api.marshal_with(chat_thread_for_teacher_model)
     @api.response(404, 'Chat not found')
     @api.response(403, 'Access denied')
     def get(self, chat_id):
