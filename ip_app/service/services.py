@@ -132,7 +132,7 @@ def get_multiple_users_with_course_for_current_user(user):
     ).join(
         Course,
         Course.course_id == Video.course_id
-    )
+    ).order_by(User.registration_date.desc(), Access.end_date.desc())
 
 
 def email_exists(email):
