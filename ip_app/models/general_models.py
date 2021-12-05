@@ -58,11 +58,11 @@ class CourseTeacherCorrespondence(db.Model):
     course_teacher_id = db.Column(INTEGER(unsigned=True),
                                   primary_key=True)
     course_id = db.Column(INTEGER(unsigned=True),
-                          db.ForeignKey('course.course_id',
+                          db.ForeignKey('courses.course_id',
                                         ondelete="CASCADE"),
                           nullable=False)
     teacher_id = db.Column(INTEGER(unsigned=True),
-                           db.ForeignKey('user.user_id',
+                           db.ForeignKey('users.user_id',
                                          ondelete="CASCADE"),
                            nullable=False)
 
