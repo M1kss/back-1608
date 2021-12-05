@@ -89,7 +89,7 @@ course_base_model = api.model('Course base model', {
     'author_name': fields.String,
 })
 
-user_model_with_course = api.clone('User model with course', short_user_model, {
+user_model_with_course = api.clone('User model with course', course_base_model, {
     'course': fields.Nested(course_base_model)
 })
 

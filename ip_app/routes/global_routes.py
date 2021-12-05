@@ -89,7 +89,8 @@ class PwdAuth(Resource):
 
 users_parser = pagination_parser.copy()
 
-#TODO add table type to parser
+
+# TODO add table type to parser
 @usr_nsp.route('')
 class UserCollection(Resource, PaginationMixin):
     """
@@ -127,8 +128,9 @@ class ActiveUserCollection(Resource, PaginationMixin):
         """
         print(services.get_multiple_users_with_course_for_current_user(g.current_user).all())
         return services.add_course_to_user(self.paginate(users_parser.parse_args(),
-                             default_order_clauses=(User.registration_date.desc(),),
-                             query=services.get_multiple_users_with_course_for_current_user(g.current_user)))
+                                                         default_order_clauses=(User.registration_date.desc(),),
+                                                         query=services.get_multiple_users_with_course_for_current_user(
+                                                             g.current_user)))
 
 
 applications_parser = pagination_parser.copy()
