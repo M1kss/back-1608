@@ -125,7 +125,7 @@ class ActiveUserCollection(Resource, PaginationMixin):
         """
         Get multiple users with active course
         """
-        print(services.get_multiple_users_with_course_for_current_user(g.current_user))
+        print(services.get_multiple_users_with_course_for_current_user(g.current_user).all())
         return self.paginate(users_parser.parse_args(),
                              default_order_clauses=(User.registration_date.desc(),),
                              query=services.get_multiple_users_with_course_for_current_user(g.current_user))

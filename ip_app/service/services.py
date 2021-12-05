@@ -121,7 +121,7 @@ def get_multiple_users_filters_for_current_user(user):
 
 
 def get_multiple_users_with_course_for_current_user(user):
-    return [setattr(u, 'course', course) or u for course, u in session.query(User, Course).join(
+    return session.query(User, Course).join(
         Access,
         Access.user_id == User.user_id
     ).filter(
@@ -132,7 +132,7 @@ def get_multiple_users_with_course_for_current_user(user):
     ).join(
         Course,
         Course.course_id == Video.course_id
-    ).all()]
+    )
 
 
 def email_exists(email):
