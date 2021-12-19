@@ -608,6 +608,8 @@ def send_hw(user_id, course_id, video_id, homework):
             hw_status=hw_statuses[0]
         )
         session.add(chat_thread)
+    if homework is None:
+        homework = 'TEST: No homework found!'
     chat_line = create_chat_line(chat_thread, 'TEACHER', homework)
     session.commit()
     return chat_line
