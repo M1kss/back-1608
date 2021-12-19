@@ -497,7 +497,7 @@ def get_chats_for_student(current_user):
 
 def get_chats_for_teacher(current_user):
     chats = Chat.query.filter(
-        Chat.teacher_id == current_user.user_id
+        current_user.in_(Chat.course.teachers)
     ).all()
     result = []
     for course_id in set(chat.course_id for chat in chats):
@@ -601,6 +601,7 @@ def send_hw(user_id, course_id, video_id, homework):
         chat_thread = None
     else:
         chat, chat_thread = result
+        return
     if chat_thread is None:
         chat_thread = ChatThread(
             chat=chat,
