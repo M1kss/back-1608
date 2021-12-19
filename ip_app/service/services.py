@@ -497,7 +497,7 @@ def get_chats_for_student(current_user):
 
 def get_chats_for_teacher(current_user):
     chats = Chat.query.filter(
-        current_user.in_(Chat.course.teachers)
+        Chat.course.teachers.any(User.user_id == current_user.user_id)
     ).all()
     result = []
     for course_id in set(chat.course_id for chat in chats):
