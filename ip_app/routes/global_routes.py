@@ -114,6 +114,26 @@ class UserCollection(Resource, PaginationMixin):
 @usr_nsp.route('/active')
 class ActiveUserCollection(Resource, PaginationMixin):
     """
+    Multiple active users info
+    """
+    BaseEntity = User
+
+    @api.marshal_list_with(user_model_with_course)
+    @api.expect(users_parser)
+    @api.response(403, 'Access denied')
+    @role_required(1)
+    def get(self):
+        """
+        Get multiple users with active course
+        """
+        return services.add_course_to_user(self.paginate(users_parser.parse_args(),
+                                                         query=services.get_multiple_users_with_course_for_current_user(
+                                                             g.current_user)))
+
+
+@usr_nsp.route('/teachers')
+class ActiveUserCollection(Resource, PaginationMixin):
+    """
     Multiple users info
     """
     BaseEntity = User
@@ -126,7 +146,6 @@ class ActiveUserCollection(Resource, PaginationMixin):
         """
         Get multiple users with active course
         """
-        print(services.get_multiple_users_with_course_for_current_user(g.current_user).all())
         return services.add_course_to_user(self.paginate(users_parser.parse_args(),
                                                          query=services.get_multiple_users_with_course_for_current_user(
                                                              g.current_user)))
@@ -407,7 +426,7 @@ class AvailableCourseCollection(Resource, PaginationMixin):
         """
         Get courses available to the current user
         """
-        # TODO: sorting
+        # TODO: sorting b
         return add_progress_percent(self.paginate(pagination_parser.parse_args(),
                                                   query=services.get_available_courses_as_query_for_student(
                                                       g.current_user)))

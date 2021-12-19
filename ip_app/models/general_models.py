@@ -239,7 +239,7 @@ class Chat(db.Model):
     __tablename__ = 'hw_chats'
     __table_args__ = (
         db.UniqueConstraint('student_id', 'course_id',
-                            name='unique_video_progress_entry'),
+                            name='unique_chat_entry'),
     )
     chat_id = db.Column(INTEGER(unsigned=True), primary_key=True)
     student_id = db.Column(INTEGER(unsigned=True),

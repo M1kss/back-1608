@@ -592,6 +592,7 @@ def send_hw(user_id, course_id, video_id, homework):
     ).join(ChatThread, Chat.chat_threads).filter(
         ChatThread.video_id == video_id
     ).one_or_none()
+    print(result)
     if result is None:
         chat = Chat(
             student_id=user_id,
@@ -613,6 +614,13 @@ def send_hw(user_id, course_id, video_id, homework):
     return chat_line
 
 
+def add_field_to_obj(obj_list, key):
+    return [setattr(user, key, course) or user for user, course in obj_list]
+
+
+def add_courses_to_user(user_list):
+    return user_list
+
+
 def add_course_to_user(user_course_list):
-    return [setattr(user, 'course', course) or user
-            for user, course in user_course_list]
+    return add_field_to_obj(user_course_list, 'course')
