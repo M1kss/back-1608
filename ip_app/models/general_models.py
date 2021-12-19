@@ -232,7 +232,8 @@ class HomeWork(db.Model):
     homework_message = db.Column(db.String(300))
 
     video = db.relationship(Video, backref=db.backref('homework',
-                                                      cascade="all, delete"))
+                                                      cascade="all, delete"),
+                            uselist=False)
 
 
 class Chat(db.Model):
