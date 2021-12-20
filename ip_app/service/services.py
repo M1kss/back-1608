@@ -580,11 +580,15 @@ def add_chat_line(current_user, body):
                              ):
         return False, (403, 'Access denied')
     if sender == 'TEACHER' and hw_status is None:
-        return False, (403, '"hw_status" must be either APPROVED or NOT_APPROVED')
+        return False, (400, '"hw_status" must be either APPROVED or NOT_APPROVED')
     message = body['message']
-    chat_line = create_chat_line(chat_thread, sender, message)
-    chat_thread.chat.last_message_date = datetime.now()
-    update_chat_and_thread_read_status(chat_thread, sender, True)
+    if message:
+        chat_line = create_chat_line(chat_thread, sender, message)
+        chat_thread.chat.last_message_date = datetime.now()
+        update_chat_and_thread_read_status(chat_thread, sender, True)
+    else:
+        if sender != 'TEACHER':
+            return False, (400, 'No message provided')
     if sender == 'STUDENT':
         chat_thread.hw_status = 'PENDING'
     else:
