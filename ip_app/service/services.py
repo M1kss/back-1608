@@ -593,6 +593,10 @@ def add_chat_line(current_user, body):
     else:
         if sender != 'TEACHER':
             return False, (400, 'No message provided')
+        elif hw_status != 'APPROVED':
+            return False, (400, 'No comments provided')
+        else:
+            chat_thread.chat_lines[-1].is_read = True
     if sender == 'STUDENT':
         chat_thread.hw_status = 'PENDING'
     else:
