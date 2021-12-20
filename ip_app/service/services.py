@@ -574,7 +574,7 @@ def check_non_empty_message(message):
 def add_chat_line(current_user, body):
     chat_thread = get_chat_thread(body.pop('chat_thread_id'))
     if chat_thread.hw_status == 'APPROVED':
-        return False, (403, 'Access denied')
+        return False, (400, 'HW is already approved')
     sender = body['sender']
     hw_status = body.get('hw_status', None)
     if chat_thread.chat_lines[-1].sender == sender or \
