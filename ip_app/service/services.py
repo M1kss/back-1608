@@ -536,9 +536,9 @@ def update_read_status(obj, sender, is_new_message=False):
 
 def get_chat_items_by_chat_id(current_user, chat_id, sender):
     chat = Chat.query.get_or_404(chat_id)
-    if check_sender(current_user=current_user,
-                    chat=chat,
-                    sender=sender):
+    if not check_sender(current_user=current_user,
+                        chat=chat,
+                        sender=sender):
         return False, (403, 'Access denied')
     # Don't update read status if admin is watching...
     if sender != 'TEACHER' or current_user.role != 'ADMIN':
