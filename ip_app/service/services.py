@@ -597,12 +597,13 @@ def add_chat_line(current_user, body):
         chat_thread.hw_status = 'PENDING'
     else:
         chat_thread.hw_status = hw_status
-    chat_thread.chat_lines[-1].is_read = True
     session.commit()
     return True, chat_thread
 
 
 def create_chat_line(chat_thread, sender, message):
+    if len(chat_thread.chat_lines) > 0:
+        chat_thread.chat_lines[-1].is_read = True
     chat_line = ChatLine(
         chat_thread=chat_thread,
         sender=sender,
@@ -639,9 +640,8 @@ def send_hw(user_id, course_id, video_id, homework):
         return
     if homework is None:
         homework = 'TEST: No homework found!'
-    chat_line = create_chat_line(chat_thread, 'TEACHER', homework)
+    create_chat_line(chat_thread, 'TEACHER', homework)
     session.commit()
-    return chat_line
 
 
 def add_field_to_obj(obj_list, key):
