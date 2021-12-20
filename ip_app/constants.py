@@ -14,4 +14,4 @@ EMAIL_REGEX = r'\S+@\S+\.\S+'
 PHONE_REGEX = r'^[0-9]{10}$'
 sex_choices = ('F', 'M')
 sender_choices = ('TEACHER', 'STUDENT')
-hw_statuses = ('RECEIVED', 'APPROVED', 'NOT_APPROVED')
+hw_statuses = ('IN_PROGRESS', 'PENDING', 'APPROVED', 'NOT_APPROVED')
