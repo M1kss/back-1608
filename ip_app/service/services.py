@@ -572,7 +572,7 @@ def add_chat_line(current_user, body):
     if chat_thread.hw_status == 'APPROVED':
         return False, (403, 'Access denied')
     sender = body['sender']
-    hw_status = body.get('status', None)
+    hw_status = body.get('hw_status', None)
     if chat_thread.chat_lines[-1].sender == sender or \
             not check_sender(current_user=current_user,
                              chat=chat_thread.chat,
@@ -580,7 +580,7 @@ def add_chat_line(current_user, body):
                              ):
         return False, (403, 'Access denied')
     if sender == 'TEACHER' and hw_status is None:
-        return False, (403, 'HW must be either approved or disapproved')
+        return False, (403, '"hw_status" must be either APPROVED or NOT_APPROVED')
     message = body['message']
     chat_line = create_chat_line(chat_thread, sender, message)
     chat_thread.chat.last_message_date = datetime.now()
