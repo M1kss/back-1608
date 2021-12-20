@@ -280,7 +280,7 @@ chat_line_model = api.model('Chat line', {
     'sender': fields.String(enum=sender_choices, required=True),
     'chat_thread_id': fields.Integer(required=True),
     'is_read': fields.Boolean,
-    'hw_status': fields.String(enum=hw_statuses[2:])
+    'hw_status': fields.String(enum=hw_statuses)
 })
 
 chat_base_model = api.model('Chat base model', {

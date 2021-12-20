@@ -579,7 +579,7 @@ def add_chat_line(current_user, body):
                              sender=sender
                              ):
         return False, (403, 'Access denied')
-    if hw_status is None and sender == 'TEACHER':
+    if sender == 'TEACHER' and hw_status not in hw_statuses[2:]:
         return False, (403, 'HW must be either approved or disapproved')
     message = body['message']
     chat_line = create_chat_line(chat_thread, sender, message)
