@@ -567,6 +567,10 @@ def check_sender(current_user, chat, sender):
     return result
 
 
+def check_non_empty_message(message):
+    return message
+
+
 def add_chat_line(current_user, body):
     chat_thread = get_chat_thread(body.pop('chat_thread_id'))
     if chat_thread.hw_status == 'APPROVED':
@@ -582,7 +586,7 @@ def add_chat_line(current_user, body):
     if sender == 'TEACHER' and hw_status is None:
         return False, (400, '"hw_status" must be either APPROVED or NOT_APPROVED')
     message = body['message']
-    if message:
+    if check_non_empty_message(message):
         chat_line = create_chat_line(chat_thread, sender, message)
         chat_thread.chat.last_message_date = datetime.now()
         update_chat_and_thread_read_status(chat_thread, sender, True)
