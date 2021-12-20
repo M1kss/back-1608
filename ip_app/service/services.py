@@ -569,17 +569,26 @@ def check_sender(current_user, chat, sender):
 
 def add_chat_line(current_user, body):
     chat_thread = get_chat_thread(body.pop('chat_thread_id'))
+    if chat_thread.hw_status == 'APPROVED':
+        return False, (403, 'Access denied')
     sender = body['sender']
+    hw_status = body.get('status', None)
     if chat_thread.chat_lines[-1].sender == sender or \
             not check_sender(current_user=current_user,
                              chat=chat_thread.chat,
                              sender=sender
                              ):
         return False, (403, 'Access denied')
+    if hw_status is None and sender == 'TEACHER':
+        return False, (403, 'HW must be either approved or disapproved')
     message = body['message']
     chat_line = create_chat_line(chat_thread, sender, message)
     chat_thread.chat.last_message_date = datetime.now()
     update_chat_and_thread_read_status(chat_thread, sender, True)
+    if sender == 'STUDENT':
+        chat_thread.hw_status = 'PENDING'
+    else:
+        chat_thread.hw_status = hw_status
     session.commit()
     return True, chat_line
 
