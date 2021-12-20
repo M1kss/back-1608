@@ -548,7 +548,7 @@ def get_chat_items_by_chat_id(current_user, chat_id, sender):
             if chat_thread.chat_lines[-1].sender != sender:
                 chat_thread.chat_lines[-1].is_read = True
         session.commit()
-    return chat.chat_threads
+    return True, chat.chat_threads
 
 
 def check_teacher_able_to_send(current_user, chat):
