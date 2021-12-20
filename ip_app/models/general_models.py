@@ -264,7 +264,7 @@ class ChatThread(db.Model):
     chat_thread_id = db.Column(INTEGER(unsigned=True), primary_key=True)
     chat_id = db.Column(INTEGER(unsigned=True),
                         db.ForeignKey('hw_chats.chat_id', ondelete="CASCADE"), nullable=False)
-    hw_status = db.Column(db.Enum(*hw_statuses), server_default=hw_statuses[0])
+    # hw_status = db.Column(db.Enum(*hw_statuses), server_default=hw_statuses[0])
     video_id = db.Column(INTEGER(unsigned=True),
                          db.ForeignKey('videos.video_id', ondelete="SET NULL"),
                          )
