@@ -597,6 +597,7 @@ def add_chat_line(current_user, body):
         chat_thread.hw_status = 'PENDING'
     else:
         chat_thread.hw_status = hw_status
+    chat_thread.chat_lines[-1].is_read = True
     session.commit()
     return True, chat_thread
 
@@ -627,7 +628,6 @@ def send_hw(user_id, course_id, video_id, homework):
         chat_thread = None
     else:
         chat, chat_thread = result
-        return
     if chat_thread is None:
         chat_thread = ChatThread(
             chat=chat,
@@ -635,6 +635,8 @@ def send_hw(user_id, course_id, video_id, homework):
             hw_status=hw_statuses[0]
         )
         session.add(chat_thread)
+    else:
+        return
     if homework is None:
         homework = 'TEST: No homework found!'
     chat_line = create_chat_line(chat_thread, 'TEACHER', homework)
