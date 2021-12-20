@@ -274,14 +274,20 @@ course_application_model = api.model('Course application', {
     'course': fields.Nested(course_base_model, readonly=True)
 })
 
+
 chat_line_model = api.model('Chat line', {
     'chat_line_id': fields.Integer(readonly=True),
     'message': fields.String,
     'sender': fields.String(enum=sender_choices, required=True),
     'chat_thread_id': fields.Integer(required=True),
-    'is_read': fields.Boolean,
-    'hw_status': fields.String(enum=hw_statuses)
+    'is_read': fields.Boolean(readonly=True),
 })
+
+
+chat_line_sent_model = api.clone('Chat sent line', chat_line_model, {
+    'hw_status': fields.String(enum=hw_statuses[2:])
+})
+
 
 chat_base_model = api.model('Chat base model', {
     'chat_id': fields.Integer,
