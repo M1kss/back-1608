@@ -278,6 +278,7 @@ course_application_model = api.model('Course application', {
 chat_line_model = api.model('Chat line', {
     'chat_line_id': fields.Integer(readonly=True),
     'message': fields.String,
+    'message_date': fields.DateTime(readonly=True),
     'sender': fields.String(enum=sender_choices, required=True),
     'chat_thread_id': fields.Integer(required=True),
     'is_read': fields.Boolean(readonly=True),
