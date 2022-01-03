@@ -3,10 +3,10 @@ from uuid import uuid4
 
 from sqlalchemy import or_, and_
 
-from ip_app import session, db, ChatLine, Chat, hw_statuses
+from ip_app import session, db
 from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct, \
     UserRegistration, OrderCourseProductItem, OrderServiceProductItem, Order, VideoProgressTracking, \
-    CourseProgressTracking, ChatThread
+    CourseProgressTracking, ChatThread, ChatLine, Chat, hw_statuses, HomeWork
 
 
 def get_user(value, by='id'):
@@ -258,7 +258,8 @@ def create_new_course(data):
                     course_products=[CourseProduct(**course_product_data) for course_product_data in course_products],
                     service_products=[ServiceProduct(**service_product_data) for service_product_data in
                                       service_products],
-                    videos=[Video(**video_data) for video_data in videos])
+                    videos=[Video(homework=HomeWork(homework_message=video_data.pop('homework', None)),
+                                  **video_data) for video_data in videos])
     session.add(course)
     session.commit()
 
@@ -621,7 +622,10 @@ def send_hw(user_id, course_id, video_id, homework):
     result = session.query(Chat, ChatThread).filter(
         Chat.student_id == user_id,
         Chat.course_id == course_id
-    ).join(ChatThread, Chat.chat_threads).filter(
+    ).join(ChatThread,
+           Chat.chat_threads,
+           isouter=True
+           ).filter(
         ChatThread.video_id == video_id
     ).one_or_none()
     if result is None:

@@ -112,6 +112,7 @@ video_base_model = api.model('Base video model', {
 video_model = api.clone('Video model', video_base_model, {
     'video_id': fields.Integer(min=1, readonly=True),
     'title': fields.String(required=True),
+    'homework': fields.String,
     'url': fields.String(required=True),
 })
 
