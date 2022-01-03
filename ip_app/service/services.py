@@ -622,11 +622,11 @@ def send_hw(user_id, course_id, video_id, homework):
     result = session.query(Chat, ChatThread).filter(
         Chat.student_id == user_id,
         Chat.course_id == course_id
-    ).join(ChatThread,
-           Chat.chat_threads,
-           isouter=True
-           ).filter(
-        ChatThread.video_id == video_id
+    ).join(
+        ChatThread,
+        and_(ChatThread.chat_id == Chat.chat_id,
+             ChatThread.video_id == video_id),
+        isouter=True
     ).one_or_none()
     print(result)
     if result is None:
