@@ -628,7 +628,6 @@ def send_hw(user_id, course_id, video_id, homework):
              ChatThread.video_id == video_id),
         isouter=True
     ).one_or_none()
-    print(result)
     if result is None:
         chat = Chat(
             student_id=user_id,
