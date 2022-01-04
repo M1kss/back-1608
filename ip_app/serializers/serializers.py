@@ -215,20 +215,6 @@ course_landing_model = api.clone('Course landing model', course_base_model, {
 course_full_model = api.clone('Course admin model', course_landing_model, {
     'videos': fields.List(fields.Nested(video_admin_model))
 })
-
-course_patch_model = api.model('Course patch model', {
-    'title': fields.String,
-    'description': fields.String,
-    'course_pic_url': fields.String,
-    'teacher_ids': fields.List(fields.Integer,
-                               required=True,
-                               min_items=1),
-    'author_name': fields.String,
-    'landing_info': fields.Nested(landing_info_model),
-    'videos': fields.List(fields.Nested(patch_video_model), default=[])
-})
-
-
 course_post_model = api.model('Course post model', {
     'title': fields.String(required=True),
     'description': fields.String,
@@ -239,6 +225,16 @@ course_post_model = api.model('Course post model', {
     'course_products': fields.List(fields.Nested(course_product_model), required=True, min_items=1),
     'service_products': fields.List(fields.Nested(service_product_model), default=[]),
     'videos': fields.List(fields.Nested(video_admin_model), default=[])
+})
+
+
+course_patch_model = api.clone('Course patch model', course_post_model, {
+    'title': fields.String,
+    'teacher_ids': fields.List(fields.Integer, min_items=1),
+    'author_name': fields.String,
+    'landing_info': fields.Nested(landing_info_model),
+    'videos': fields.List(fields.Nested(patch_video_model), default=[]),
+    'course_products': fields.List(fields.Nested(course_product_model), min_items=1),
 })
 
 payment_link_model = api.model('Payment link model', {
