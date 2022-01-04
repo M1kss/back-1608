@@ -253,13 +253,23 @@ def create_new_course(data):
     service_products = data.pop('service_products')
     teachers = [get_user(user_id) for user_id
                 in data.pop('teacher_ids')]
+    videos_db = []
+    for video_data in videos:
+        hw = video_data.pop('homework', None)
+        if hw is not None:
+            hw_db = HomeWork(homework_message=hw)
+        videos_db.append(
+            Video(
+                homework=hw_db,
+                **video_data
+            )
+        )
     course = Course(**data,
                     teachers=teachers,
                     course_products=[CourseProduct(**course_product_data) for course_product_data in course_products],
                     service_products=[ServiceProduct(**service_product_data) for service_product_data in
                                       service_products],
-                    videos=[Video(homework=HomeWork(homework_message=video_data.pop('homework', None)),
-                                  **video_data) for video_data in videos])
+                    videos=videos_db)
     session.add(course)
     session.commit()
 
