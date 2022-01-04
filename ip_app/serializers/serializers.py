@@ -117,6 +117,7 @@ video_model = api.clone('Video model', video_base_model, {
 
 
 homework_model = api.model('HW model', {
+    'video_homework_id': fields.Integer(readonly=True),
     'video_id': fields.Integer(readonly=True),
     'homework_message': fields.String
 })
@@ -126,12 +127,8 @@ video_admin_model = api.clone('Video admin model', video_model, {
     'homework': fields.Nested(homework_model)
 })
 
-
-post_video_model = api.clone('Video post model', video_model, {
-    'homework': fields.String,
-})
-
-patch_video_model = api.clone('Video model with id', post_video_model, {
+patch_video_model = api.clone('Video model with id', video_admin_model, {
+    'video_id': fields.Integer(min=1, required=True),
     'url': fields.String,
 })
 
@@ -241,7 +238,7 @@ course_post_model = api.model('Course post model', {
     'landing_info': fields.Nested(landing_info_model, required=True),
     'course_products': fields.List(fields.Nested(course_product_model), required=True, min_items=1),
     'service_products': fields.List(fields.Nested(service_product_model), default=[]),
-    'videos': fields.List(fields.Nested(post_video_model), default=[])
+    'videos': fields.List(fields.Nested(video_admin_model), default=[])
 })
 
 payment_link_model = api.model('Payment link model', {

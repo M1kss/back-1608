@@ -257,7 +257,7 @@ def create_new_course(data):
     for video_data in videos:
         hw = video_data.pop('homework', None)
         if hw is not None:
-            hw_db = HomeWork(homework_message=hw)
+            hw_db = HomeWork(**hw)
         videos_db.append(
             Video(
                 homework=hw_db,
@@ -295,6 +295,14 @@ def patch_course(course_id, data):
         video = get_video_by_id(video_data.pop('video_id'))
         if video.course_id != course.course_id:
             return None, 400, 'Incorrect video id for course'
+        hw = video_data.pop('homework', None)
+        if hw is not None:
+            if video.homework is not None:
+                for field, value in hw.items():
+                    setattr(video.homework, field, value)
+            else:
+                hw_db = HomeWork(video=video, **hw)
+                session.add(hw_db)
         for field, value in video_data.items():
             setattr(video, field, value)
 
