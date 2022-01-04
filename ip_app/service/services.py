@@ -630,7 +630,7 @@ def create_chat_line(chat_thread, sender, message):
     chat_line = ChatLine(
         chat_thread=chat_thread,
         sender=sender,
-        message=message
+        message=message.homework_message
     )
     session.add(chat_line)
     return chat_line
