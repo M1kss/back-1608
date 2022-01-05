@@ -137,8 +137,9 @@ def get_multiple_users_with_course_for_current_user():
 
 def get_multiple_teachers_with_courses():
     return session.query(User,
-                         db.func.concat(Course.course_id),
-                         db.func.concat(Course.title)).join(
+                         db.func.group_concat(Course.course_id),
+                         db.func.group_concat(Course.title)
+    ).join(
         Course,
         User.taught_courses
     ).group_by(
