@@ -690,7 +690,7 @@ def add_courses_to_user(user_list):
     result = []
     for user, c_ids, c_names in user_list:
         courses = []
-        for c_id, c_name in zip(c_ids.split(','), c_names.split(',')):
+        for c_id, c_name in zip(c_ids.split('@@'), c_names.split('@@')):
             course = type('', (), {})()
             setattr(course, 'course_id', c_id)
             setattr(course, 'title', c_name)
