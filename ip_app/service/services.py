@@ -136,12 +136,15 @@ def get_multiple_users_with_course_for_current_user():
 
 
 def get_multiple_teachers_with_courses():
-    return session.query(User, Course).join(
-        User,
-        Course.teachers
+    return session.query(User,
+                         db.func.concat(Course.course_id),
+                         db.func.concat(Course.title)).join(
+        Course,
+        User.taught_courses
     ).group_by(
         User.user_id
-    ).order_by(User.registration_date.desc())
+    ).order_by(
+        User.registration_date.desc())
 
 
 def email_exists(email):
@@ -683,7 +686,8 @@ def add_field_to_obj(obj_list, key):
 
 
 def add_courses_to_user(user_list):
-    return user_list
+    print(user_list)
+    return [user for user, c_ids, c_names in user_list]
 
 
 def add_course_to_user(user_course_list):
