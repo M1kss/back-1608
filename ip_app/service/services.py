@@ -637,37 +637,34 @@ def create_chat_line(chat_thread, sender, message):
 
 
 def send_hw(user_id, course_id, video_id, homework):
-    result = session.query(Chat, ChatThread).filter(
-        Chat.student_id == user_id,
-        Chat.course_id == course_id
-    ).join(
-        ChatThread,
-        and_(ChatThread.chat_id == Chat.chat_id,
-             ChatThread.video_id == video_id),
-        isouter=True
-    ).one_or_none()
-    if result is None:
-        chat = Chat(
-            student_id=user_id,
-            course_id=course_id
-        )
-        session.add(chat)
-        chat_thread = None
-    else:
-        chat, chat_thread = result
-    if chat_thread is None:
-        chat_thread = ChatThread(
-            chat=chat,
-            video_id=video_id,
-            hw_status=hw_statuses[0]
-        )
-        session.add(chat_thread)
-    else:
-        return
-    if homework is None:
-        homework = 'TEST: No homework found!'
-    create_chat_line(chat_thread, 'TEACHER', homework)
-    session.commit()
+    if homework is not None:
+        result = session.query(Chat, ChatThread).filter(
+            Chat.student_id == user_id,
+            Chat.course_id == course_id
+        ).join(
+            ChatThread,
+            and_(ChatThread.chat_id == Chat.chat_id,
+                 ChatThread.video_id == video_id),
+            isouter=True
+        ).one_or_none()
+        if result is None:
+            chat = Chat(
+                student_id=user_id,
+                course_id=course_id
+            )
+            session.add(chat)
+            chat_thread = None
+        else:
+            chat, chat_thread = result
+        if chat_thread is None:
+            chat_thread = ChatThread(
+                chat=chat,
+                video_id=video_id,
+                hw_status=hw_statuses[0]
+            )
+            session.add(chat_thread)
+        create_chat_line(chat_thread, 'TEACHER', homework)
+        session.commit()
 
 
 def add_field_to_obj(obj_list, key):
