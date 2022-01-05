@@ -307,12 +307,12 @@ chat_base_model = api.model('Chat base model', {
 
 chat_with_teacher_read_model = api.clone('Chat model with teacher', chat_base_model, {
     'course': fields.Nested(course_base_model),
-    'teacher_read': fields.Boolean
+    'student_read': fields.Boolean,
 })
 
 chat_with_student_model = api.clone('Chat model with student', chat_base_model, {
     'student': fields.Nested(short_user_model),
-    'student_read': fields.Boolean
+    'teacher_read': fields.Boolean
 })
 chat_teacher_model = api.model('Chat teacher model', {
     'course': fields.Nested(course_base_model),
