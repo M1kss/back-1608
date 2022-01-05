@@ -130,6 +130,7 @@ video_admin_model = api.clone('Video admin model', video_model, {
 patch_video_model = api.clone('Video model with id', video_admin_model, {
     'video_id': fields.Integer(min=1, required=True),
     'url': fields.String,
+    'title': fields.String,
 })
 
 course_progress_model = api.model(

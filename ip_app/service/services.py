@@ -279,8 +279,10 @@ def create_new_course(data):
 def patch_course(course_id, data):
     course = get_course_by_id(course_id)
     videos = data.pop('videos', [])
-    course.teachers = [get_user(user_id) for user_id
-                       in data.pop('teacher_ids', [])]
+    teacher_ids = data.pop('teacher_ids', None)
+    if teacher_ids is not None:
+        course.teachers = [get_user(user_id) for user_id
+                           in teacher_ids]
     new_landing_info = data.pop('landing_info', None)
     if new_landing_info is not None:
         land_info = {}
