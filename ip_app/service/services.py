@@ -644,7 +644,7 @@ def create_chat_line(chat_thread, sender, message):
     chat_line = ChatLine(
         chat_thread=chat_thread,
         sender=sender,
-        message=message.homework_message
+        message=message
     )
     session.add(chat_line)
     return chat_line
@@ -677,7 +677,7 @@ def send_hw(user_id, course_id, video_id, homework):
                 hw_status=hw_statuses[0]
             )
             session.add(chat_thread)
-        create_chat_line(chat_thread, 'TEACHER', homework)
+        create_chat_line(chat_thread, 'TEACHER', homework.homework_message)
         session.commit()
 
 
