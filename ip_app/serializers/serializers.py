@@ -319,17 +319,9 @@ chat_teacher_model = api.model('Chat teacher model', {
     'chats': fields.List(fields.Nested(chat_with_student_model))
 })
 
-chat_thread_model_base = api.model('Chat thread model', {
+chat_thread_model = api.model('Chat thread model', {
     'chat_thread_id': fields.Integer,
     'chat_lines': fields.List(fields.Nested(chat_line_model)),
     'hw_status': fields.String(enum=hw_statuses),
     'video': fields.Nested(video_base_model)
-})
-
-chat_thread_for_student_model = api.clone('Chat thread student model', chat_thread_model_base, {
-    'teacher_read': fields.Boolean
-})
-
-chat_thread_for_teacher_model = api.clone('Chat thread teacher model', chat_thread_model_base, {
-    'student_read': fields.Boolean
 })

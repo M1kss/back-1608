@@ -11,8 +11,7 @@ from ip_app.serializers.serializers import user_model_with_token, user_model_bas
     available_course_model, available_course_with_video_model, course_full_model, course_post_model, \
     contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model, \
     user_model_patch, course_patch_model, video_progress_model, chat_line_model, chat_with_teacher_read_model, \
-    chat_thread_for_student_model, chat_teacher_model, chat_thread_for_teacher_model, user_model_with_course, \
-    chat_thread_model_base
+    chat_teacher_model, user_model_with_course, chat_thread_model
 from ip_app.utils import PaginationMixin
 
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
@@ -467,7 +466,7 @@ class ChatsCollection(Resource):
     @api.expect(chat_line_model)
     @api.response(404, 'Chat thread not found')
     @api.response(403, 'Access denied')
-    @api.marshal_with(chat_thread_model_base)
+    @api.marshal_with(chat_thread_model)
     @role_required()
     def post(self):
         """
@@ -484,7 +483,7 @@ class ChatsCollection(Resource):
 @cht_nsp.route('/<int:chat_id>')
 class ChatItem(Resource):
     @role_required()
-    @api.marshal_list_with(chat_thread_for_student_model)
+    @api.marshal_list_with(chat_thread_model)
     @api.response(404, 'Chat not found')
     @api.response(403, 'Access denied')
     def get(self, chat_id):
@@ -512,7 +511,7 @@ class ChatsTeacherCollection(Resource):
 @cht_nsp.route('/teacher/<int:chat_id>')
 class ChatTeacherItem(Resource):
     @role_required(1)
-    @api.marshal_list_with(chat_thread_for_teacher_model)
+    @api.marshal_list_with(chat_thread_model)
     @api.response(404, 'Chat not found')
     @api.response(403, 'Access denied')
     def get(self, chat_id):
