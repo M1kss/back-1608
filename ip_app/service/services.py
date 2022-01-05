@@ -119,7 +119,7 @@ def get_multiple_users_filters_for_current_user(user):
         raise AssertionError
 
 
-def get_multiple_users_with_course_for_current_user(user):
+def get_multiple_users_with_course_for_current_user():
     return session.query(User, Course).join(
         Access,
         Access.user_id == User.user_id
@@ -131,6 +131,16 @@ def get_multiple_users_with_course_for_current_user(user):
     ).join(
         Course,
         Course.course_id == Video.course_id
+    ).order_by(User.registration_date.desc(),
+               Access.end_date.desc())
+
+
+def get_multiple_teachers_with_courses():
+    return session.query(User, Course).join(
+        Course,
+        Course.teachers
+    ).group_by(
+        User.user_id
     ).order_by(User.registration_date.desc(),
                Access.end_date.desc())
 

@@ -93,6 +93,10 @@ user_model_with_course = api.clone('User model with course', user_model_base, {
     'course': fields.Nested(course_base_model)
 })
 
+teacher_model_with_courses = api.clone('Teacher model with courses', user_model_base, {
+    'courses': fields.List(fields.Nested(course_base_model))
+})
+
 progress_percent_dict = {'progress_percent': fields.Integer(readonly=True)}
 
 available_course_model = api.clone('Avalilable course model', course_base_model, progress_percent_dict)

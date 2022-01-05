@@ -11,7 +11,7 @@ from ip_app.serializers.serializers import user_model_with_token, user_model_bas
     available_course_model, available_course_with_video_model, course_full_model, course_post_model, \
     contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model, \
     user_model_patch, course_patch_model, video_progress_model, chat_line_model, chat_with_teacher_read_model, \
-    chat_teacher_model, user_model_with_course, chat_thread_model
+    chat_teacher_model, user_model_with_course, chat_thread_model, teacher_model_with_courses
 from ip_app.utils import PaginationMixin
 
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
@@ -127,18 +127,17 @@ class ActiveUserCollection(Resource, PaginationMixin):
         Get multiple users with active course
         """
         return services.add_course_to_user(self.paginate(users_parser.parse_args(),
-                                                         query=services.get_multiple_users_with_course_for_current_user(
-                                                             g.current_user)))
+                                                         query=services.get_multiple_users_with_course_for_current_user()))
 
 
 @usr_nsp.route('/teachers')
-class ActiveUserCollection(Resource, PaginationMixin):
+class TeacherCollection(Resource, PaginationMixin):
     """
-    Multiple users info
+    Multiple teachers info
     """
     BaseEntity = User
 
-    @api.marshal_list_with(user_model_with_course)
+    @api.marshal_list_with(teacher_model_with_courses)
     @api.expect(users_parser)
     @api.response(403, 'Access denied')
     @role_required(1)
@@ -146,9 +145,8 @@ class ActiveUserCollection(Resource, PaginationMixin):
         """
         Get multiple users with active course
         """
-        return services.add_course_to_user(self.paginate(users_parser.parse_args(),
-                                                         query=services.get_multiple_users_with_course_for_current_user(
-                                                             g.current_user)))
+        return services.add_courses_to_user(self.paginate(users_parser.parse_args(),
+                                                          query=services.get_multiple_teachers_with_courses()))
 
 
 applications_parser = pagination_parser.copy()
