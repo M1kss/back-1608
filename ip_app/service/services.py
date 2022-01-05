@@ -137,8 +137,8 @@ def get_multiple_users_with_course_for_current_user():
 
 def get_multiple_teachers_with_courses():
     return session.query(User,
-                         db.func.group_concat(Course.course_id, '@@'),
-                         db.func.group_concat(Course.title, '@@')
+                         db.func.group_concat(Course.course_id),
+                         db.func.group_concat(Course.title)
     ).join(
         Course,
         User.taught_courses
@@ -690,7 +690,7 @@ def add_courses_to_user(user_list):
     result = []
     for user, c_ids, c_names in user_list:
         courses = []
-        for c_id, c_name in zip(c_ids.split('@@'), c_names.split('@@')):
+        for c_id, c_name in zip(c_ids.split(','), c_names.split(',')):
             course = type('', (), {})()
             setattr(course, 'course_id', c_id)
             setattr(course, 'title', c_name)
