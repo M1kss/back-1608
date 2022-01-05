@@ -137,7 +137,7 @@ def get_multiple_users_with_course_for_current_user():
 
 def get_multiple_teachers_with_courses():
     return session.query(User, Course).join(
-        Course,
+        User,
         Course.teachers
     ).group_by(
         User.user_id
