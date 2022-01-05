@@ -141,8 +141,7 @@ def get_multiple_teachers_with_courses():
         Course.teachers
     ).group_by(
         User.user_id
-    ).order_by(User.registration_date.desc(),
-               Access.end_date.desc())
+    ).order_by(User.registration_date.desc())
 
 
 def email_exists(email):
