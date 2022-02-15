@@ -108,7 +108,7 @@ class UserCollection(Resource, PaginationMixin):
         Get multiple users
         """
         return self.paginate(users_parser.parse_args(),
-                             extra_filters=services.get_multiple_users_query_for_current_user(g.current_user))
+                             query=services.get_multiple_users_query_for_current_user(g.current_user))
 
 
 @usr_nsp.route('/active')
@@ -652,7 +652,6 @@ class LegalInfo(Resource):
         return {}
 
 
-# FIXME
 @stc_nsp.route('')
 class Statistics(Resource):
     """
