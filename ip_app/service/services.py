@@ -138,9 +138,16 @@ def filter_users_query(query, filters=()):
 
 
 def get_teacher_with_courses(teacher_id, user):
-    return get_multiple_teachers_with_courses([x.course_id for x in user.taught_courses]).filter(
-        User.user_id == teacher_id
-    ).one_or_none()
+    teacher_db = User.query.get_or_404(teacher_id)
+    if teacher_db.role != 'TEACHER':
+        return False, (403, 'Access denied')
+    if user.role == 'ADMIN':
+        return True, teacher_db
+    else:
+        if len(set(x.course_id for x in teacher_db.taught_courses).intersection(
+                set(x.course_id for x in user.taught_courses))) == 0:
+            return False, (403, 'Access denied')
+    return True, teacher_db
 
 
 def get_multiple_teachers_with_courses(course_ids):
