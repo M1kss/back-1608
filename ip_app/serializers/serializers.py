@@ -99,7 +99,7 @@ teacher_model_with_courses_count = api.clone('Teacher model with courses', user_
 })
 
 teacher_model_with_courses = api.clone('Teacher model with courses', user_model_base, {
-    'courses': fields.List(fields.Nested(course_base_model))
+    'courses': fields.List(fields.Nested(course_base_model), attribute='taught_courses')
 })
 
 progress_percent_dict = {'progress_percent': fields.Integer(readonly=True)}
