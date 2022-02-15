@@ -138,9 +138,7 @@ def filter_users_query(query, filters=()):
 
 
 def get_teacher_with_courses(teacher_id, user):
-    return get_multiple_teachers_with_courses([x.course_id for x in user.taught_courses]).filter(
-        User.user_id == teacher_id
-    ).one_or_404()
+    return get_multiple_teachers_with_courses([x.course_id for x in user.taught_courses]).get_or_404(teacher_id)
 
 
 def get_multiple_teachers_with_courses(course_ids):
