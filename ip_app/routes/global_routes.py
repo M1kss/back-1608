@@ -177,7 +177,11 @@ class TeacherInfoItem(Resource, PaginationMixin):
         """
         Get multiple users with active course
         """
-        return services.get_teacher_with_courses(teacher_id, g.current_user)
+        teacher = services.get_teacher_with_courses(teacher_id, g.current_user)
+        if teacher is None:
+            api.abort(404, 'No teacher found')
+        else:
+            return teacher
 
 
 applications_parser = pagination_parser.copy()
