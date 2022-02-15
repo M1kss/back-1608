@@ -666,4 +666,4 @@ class Statistics(Resource):
         """
         Get sales statistics
         """
-        return {}
+        return services.get_statistics()

@@ -292,6 +292,5 @@ class ChatLine(db.Model):
 
 class Statistics(db.Model):
     __tablename__ = 'statistics'
-    statistics_id = db.Column(INTEGER(unsigned=True), primary_key=True)
-    statistics_name = db.Column(db.String(30), unique=True)
+    statistics_name = db.Column(db.String(30), primary_key=True)
     value = db.Column(INTEGER(unsigned=True))

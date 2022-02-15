@@ -714,19 +714,25 @@ def add_course_to_user(user_course_list):
     return add_field_to_obj(user_course_list, 'course')
 
 
+def get_statistics():
+    stats = Statistics.query.all()
+    return {x.statistics_name: x.value for x in stats}
+
+
 def collect_statistics():
-    for name in ('total_users', 'total_students', 'total_applications', 'total_teachers'):
-        stats_db = Statistics.query.filter(statistics_name=name).one_or_none
+    for name in ('registered_students', 'studying', 'pending_applications', 'teachers'):
+        stats_db = Statistics.query.get(name)
         if stats_db is None:
             stats_db = Statistics(statistics_name=name)
             session.add(stats_db)
-        if name == 'total_users':
-            value = User.query.distinct(User.user_id).count()
-        elif name == 'total_students':
-            value = User.query.filter(User.status == 'ACTIVE').distinct(User.user_id).count()
-        elif name == 'total_applications':
+        if name == 'registered_students':
+            value = User.query.filter(User.role == 'STUDENT').distinct(User.user_id).count()
+        elif name == 'studying':
+            value = User.query.filter(User.status == 'ACTIVE',
+                                      User.role == 'STUDENT').distinct(User.user_id).count()
+        elif name == 'pending_applications':
             value = CourseApplication.query.distinct(CourseApplication.application_id).count()
-        elif name == 'total_teachers':
+        elif name == 'teachers':
             value = User.query.filter(User.role == 'TEACHER').distinct(User.user_id).count()
         else:
             raise ValueError(name)
