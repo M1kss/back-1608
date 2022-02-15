@@ -11,7 +11,8 @@ from ip_app.serializers.serializers import user_model_with_token, user_model_bas
     available_course_model, available_course_with_video_model, course_full_model, course_post_model, \
     contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model, \
     user_model_patch, course_patch_model, video_progress_model, chat_line_model, chat_with_teacher_read_model, \
-    chat_teacher_model, user_model_with_course, chat_thread_model, teacher_model_with_courses
+    chat_teacher_model, user_model_with_course, chat_thread_model, teacher_model_with_courses_count, \
+    teacher_model_with_courses
 from ip_app.utils import PaginationMixin
 
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
@@ -107,8 +108,7 @@ class UserCollection(Resource, PaginationMixin):
         Get multiple users
         """
         return self.paginate(users_parser.parse_args(),
-                             default_order_clauses=(User.registration_date.desc(),),
-                             extra_filters=services.get_multiple_users_filters_for_current_user(g.current_user))
+                             extra_filters=services.get_multiple_users_query_for_current_user(g.current_user))
 
 
 @usr_nsp.route('/active')
@@ -126,8 +126,14 @@ class ActiveUserCollection(Resource, PaginationMixin):
         """
         Get multiple users with active course
         """
-        return services.add_course_to_user(self.paginate(users_parser.parse_args(),
-                                                         query=services.get_multiple_users_with_course_for_current_user()))
+        return services.add_field_to_obj(
+            self.paginate(users_parser.parse_args(),
+                          query=services.get_multiple_users_with_course_for_current_user()),
+            'course')
+
+
+teachers_parser = pagination_parser.copy()
+teachers_parser.add_argument('courses', help='Comma separated course ids', default=None)
 
 
 @usr_nsp.route('/teachers')
@@ -137,7 +143,7 @@ class TeacherCollection(Resource, PaginationMixin):
     """
     BaseEntity = User
 
-    @api.marshal_list_with(teacher_model_with_courses)
+    @api.marshal_list_with(teacher_model_with_courses_count)
     @api.expect(users_parser)
     @api.response(403, 'Access denied')
     @role_required(1)
@@ -145,8 +151,33 @@ class TeacherCollection(Resource, PaginationMixin):
         """
         Get multiple users with active course
         """
-        return services.add_courses_to_user(self.paginate(users_parser.parse_args(),
-                                                          query=services.get_multiple_teachers_with_courses()))
+        args = teachers_parser.parse_args()
+        course_ids = args.pop('courses', None)
+        if course_ids is not None:
+            course_ids = course_ids.split(',')
+        return services.add_field_to_obj(
+            self.paginate(args,
+                          query=services.get_multiple_teachers_with_courses(
+                              course_ids)),
+            'courses_count')
+
+
+@usr_nsp.route('/teachers/<int:teacher_id>')
+class TeacherInfoItem(Resource, PaginationMixin):
+    """
+    Single teacher info
+    """
+    BaseEntity = User
+
+    @api.marshal_with(teacher_model_with_courses)
+    @api.response(403, 'Access denied')
+    @api.response(404, 'No teacher found')
+    @role_required(1)
+    def get(self, teacher_id):
+        """
+        Get multiple users with active course
+        """
+        return services.get_teacher_with_courses(teacher_id, g.current_user)
 
 
 applications_parser = pagination_parser.copy()
@@ -621,6 +652,7 @@ class LegalInfo(Resource):
         return {}
 
 
+# FIXME
 @stc_nsp.route('')
 class Statistics(Resource):
     """

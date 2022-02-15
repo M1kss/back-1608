@@ -87,10 +87,15 @@ course_base_model = api.model('Course base model', {
     'description': fields.String,
     'course_pic_url': fields.String,
     'author_name': fields.String,
+
 })
 
 user_model_with_course = api.clone('User model with course', user_model_base, {
     'course': fields.Nested(course_base_model)
+})
+
+teacher_model_with_courses_count = api.clone('Teacher model with courses', user_model_base, {
+    'courses_count': fields.Integer
 })
 
 teacher_model_with_courses = api.clone('Teacher model with courses', user_model_base, {
@@ -218,7 +223,8 @@ course_landing_model = api.clone('Course landing model', course_base_model, {
 })
 
 course_full_model = api.clone('Course admin model', course_landing_model, {
-    'videos': fields.List(fields.Nested(video_admin_model))
+    'videos': fields.List(fields.Nested(video_admin_model)),
+    'teacher_ids': fields.List(fields.Integer, min_items=1)
 })
 course_post_model = api.model('Course post model', {
     'title': fields.String(required=True),

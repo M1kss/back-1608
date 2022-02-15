@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from sqlalchemy import or_, and_
 
-from ip_app import session, db
+from ip_app import session, db, Statistics
 from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct, \
     UserRegistration, OrderCourseProductItem, OrderServiceProductItem, Order, VideoProgressTracking, \
     CourseProgressTracking, ChatThread, ChatLine, Chat, hw_statuses, HomeWork
@@ -105,22 +105,22 @@ def check_last_seen(user):
         return True
 
 
-def get_users_filters_by_teacher(user):
-    # FIXME
-    return ()
-
-
-def get_multiple_users_filters_for_current_user(user):
+def get_multiple_users_query_for_current_user(user):
     if user.role == 'ADMIN':
-        return ()
+        filters = ()
     elif user.role == 'TEACHER':
-        return get_users_filters_by_teacher(user)
+        filters = (Course.course_id.in_([x.course_id for x in user.taught_courses]),)
     else:
         raise AssertionError
+    return filter_users_query(session.query(User), filters)
 
 
 def get_multiple_users_with_course_for_current_user():
-    return session.query(User, Course).join(
+    return filter_users_query(session.query(User, Course))
+
+
+def filter_users_query(query, filters=()):
+    return query.join(
         Access,
         Access.user_id == User.user_id
     ).filter(
@@ -131,15 +131,25 @@ def get_multiple_users_with_course_for_current_user():
     ).join(
         Course,
         Course.course_id == Video.course_id
+    ).filter(
+        *filters
     ).order_by(User.registration_date.desc(),
                Access.end_date.desc())
 
 
-def get_multiple_teachers_with_courses():
-    return session.query(User,
-                         db.func.group_concat(Course.course_id),
-                         db.func.group_concat(Course.title)
-    ).join(
+def get_teacher_with_courses(teacher_id, user):
+    return get_multiple_teachers_with_courses([x.course_id for x in user.taught_courses]).filter(
+        User.user_id == teacher_id
+    ).one_or_404()
+
+
+def get_multiple_teachers_with_courses(course_ids):
+    query = session.query(User,
+                          db.func.count(Course.course_id),
+                          )
+    if course_ids is not None:
+        query = query.filter(Course.course_id.in_(course_ids))
+    return query.join(
         Course,
         User.taught_courses
     ).group_by(
@@ -443,7 +453,7 @@ def grant_access_for_payed_order(order_id):
     # TODO deactivate link + remove existing orders for the same course product/service product
     session.add_all(access_items)
     order.status = 'PAYED'
-    session.commit()
+    order.user.status = 'ACTIVE'
 
     for course_product_item in order.course_product_items:
         course_progress = get_course_progress(order.user_id, course_product_item.course_product.course_id)
@@ -702,3 +712,23 @@ def add_courses_to_user(user_list):
 
 def add_course_to_user(user_course_list):
     return add_field_to_obj(user_course_list, 'course')
+
+
+def collect_statistics():
+    for name in ('total_users', 'total_students', 'total_applications', 'total_teachers'):
+        stats_db = Statistics.query.filter(statistics_name=name).one_or_none
+        if stats_db is None:
+            stats_db = Statistics(statistics_name=name)
+            session.add(stats_db)
+        if name == 'total_users':
+            value = User.query.distinct(User.user_id).count()
+        elif name == 'total_students':
+            value = User.query.filter(User.status == 'ACTIVE').distinct(User.user_id).count()
+        elif name == 'total_applications':
+            value = CourseApplication.query.distinct(CourseApplication.application_id).count()
+        elif name == 'total_teachers':
+            value = User.query.filter(User.role == 'TEACHER').distinct(User.user_id).count()
+        else:
+            raise ValueError(name)
+        stats_db.value = value
+    session.commit()

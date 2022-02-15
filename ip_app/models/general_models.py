@@ -288,3 +288,10 @@ class ChatLine(db.Model):
     chat_thread = db.relationship(ChatThread,
                                   backref=db.backref('chat_lines',
                                                      cascade="all, delete"))
+
+
+class Statistics(db.Model):
+    __tablename__ = 'statistics'
+    statistics_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    statistics_name = db.Column(db.String(30), unique=True)
+    value = db.Column(INTEGER(unsigned=True))
