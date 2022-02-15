@@ -224,8 +224,8 @@ course_landing_model = api.clone('Course landing model', course_base_model, {
 
 course_full_model = api.clone('Course admin model', course_landing_model, {
     'videos': fields.List(fields.Nested(video_admin_model)),
-    'teacher_ids': fields.List(fields.Integer, min_items=1,
-                               attribute='teachers.user_id')
+    'teacher_ids': fields.List(fields.Nested(user_model_base), min_items=1,
+                               attribute='teachers')
 })
 course_post_model = api.model('Course post model', {
     'title': fields.String(required=True),
