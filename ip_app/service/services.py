@@ -139,7 +139,7 @@ def filter_users_query(query, filters=()):
 
 def get_teacher_with_courses(teacher_id, user):
     teacher_db = User.query.get_or_404(teacher_id)
-    if teacher_db.role != 'TEACHER':
+    if teacher_db.role not in ('TEACHER', 'ADMIN'):
         return False, (403, 'Access denied')
     if user.role == 'ADMIN':
         return True, teacher_db
