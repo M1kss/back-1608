@@ -330,6 +330,12 @@ chat_teacher_model = api.model('Chat teacher model', {
     'chats': fields.List(fields.Nested(chat_with_student_model))
 })
 
+notifications_model = api.model('Notifications model', {
+    'notification_id': fields.Integer(readonly=True),
+    'message': fields.String(required=True),
+    'message_date': fields.DateTime(readonly=True)
+})
+
 chat_thread_model = api.model('Chat thread model', {
     'chat_thread_id': fields.Integer,
     'chat_lines': fields.List(fields.Nested(chat_line_model)),

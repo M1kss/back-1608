@@ -290,6 +290,14 @@ class ChatLine(db.Model):
                                                      cascade="all, delete"))
 
 
+class Notifications(db.Model):
+    __tablename__ = 'notifications'
+    notification_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    message = db.Column(db.String(300), nullable=False)
+    message_date = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
+
+
+
 class Statistics(db.Model):
     __tablename__ = 'statistics'
     statistics_name = db.Column(db.String(30), primary_key=True)

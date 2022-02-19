@@ -12,7 +12,7 @@ from ip_app.serializers.serializers import user_model_with_token, user_model_bas
     contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model, \
     user_model_patch, course_patch_model, video_progress_model, chat_line_model, chat_with_teacher_read_model, \
     chat_teacher_model, user_model_with_course, chat_thread_model, teacher_model_with_courses_count, \
-    teacher_model_with_courses
+    teacher_model_with_courses, notifications_model
 from ip_app.utils import PaginationMixin
 
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
@@ -557,6 +557,50 @@ class ChatTeacherItem(Resource):
             status, response = chat_items
             api.abort(status, response)
         return chat_items
+
+
+@cht_nsp.route('/notifications')
+class ChatsNotificationsCollection(Resource):
+    @role_required()
+    @api.marshal_list_with(notifications_model)
+    def get(self):
+        """
+        Get all notifications
+        """
+        return services.get_notifications()
+
+    @role_required(0)
+    @api.marshal_with(notifications_model)
+    @api.expect(notifications_model)
+    @api.response(403, 'Access denied')
+    def post(self):
+        """
+        Post new notification
+        """
+        return services.post_notification(request.get_json())
+
+
+@cht_nsp.route('/notifications/<int:not_id>')
+class ChatsNotificationsCollection(Resource):
+    @role_required(0)
+    @api.expect(notifications_model)
+    @api.marshal_with(notifications_model)
+    @api.response(404, 'Notification does not exist')
+    @api.response(403, 'Access denied')
+    def patch(self, not_id):
+        """
+        Patch notification
+        """
+        return services.patch_notification(not_id, request.get_json())
+
+    @role_required(0)
+    @api.response(404, 'Notification does not exist')
+    @api.response(403, 'Access denied')
+    def delete(self, not_id):
+        """
+        Delete notification
+        """
+        return services.delete_notification(not_id)
 
 
 @pmt_nsp.route('')

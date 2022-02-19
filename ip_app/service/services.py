@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from sqlalchemy import or_, and_
 
-from ip_app import session, db, Statistics
+from ip_app import session, db, Statistics, Notifications
 from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct, \
     UserRegistration, OrderCourseProductItem, OrderServiceProductItem, Order, VideoProgressTracking, \
     CourseProgressTracking, ChatThread, ChatLine, Chat, hw_statuses, HomeWork
@@ -745,3 +745,31 @@ def collect_statistics():
             raise ValueError(name)
         stats_db.value = value
     session.commit()
+
+
+#  NOTIFICATIONS
+def get_notifications():
+    return Notifications.query.all()
+
+
+def post_notification(notification_model):
+    notification_db = Notifications(
+        message=notification_model.pop('message')
+    )
+    session.add(notification_db)
+    session.commit()
+    return notification_db
+
+
+def patch_notification(not_id, notification_model):
+    notification_db = Notifications.query.get_or_404(not_id)
+    notification_db.message = notification_model.pop('message')
+    session.commit()
+    return notification_db
+
+
+def delete_notification(not_id):
+    notification_db = Notifications.query.get_or_404(not_id)
+    session.delete(notification_db)
+    session.commit()
+    return {}
