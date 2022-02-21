@@ -166,7 +166,7 @@ discount_model = api.model('Discount model', {
 })
 
 course_product_model = api.clone('Course product model', discount_model, {
-    'course_product_id': fields.Integer(min=1, readonly=True),
+    'course_product_id': fields.Integer(min=1),
     'title': fields.String(required=True),
     'description': fields.String,
     'duration': fields.String,
@@ -174,7 +174,7 @@ course_product_model = api.clone('Course product model', discount_model, {
 })
 
 service_product_model = api.clone('Service product model', discount_model, {
-    'service_product_id': fields.Integer(min=1, readonly=True),
+    'service_product_id': fields.Integer(min=1),
     'title': fields.String(required=True),
     'description': fields.String,
     'price': fields.Integer(required=True),

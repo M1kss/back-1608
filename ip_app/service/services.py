@@ -307,29 +307,35 @@ def create_new_course(data):
 
 
 def patch_course(course_id, data):
-    course = get_course_by_id(course_id)
+    course_db = get_course_by_id(course_id)
     videos = data.pop('videos', [])
     teacher_ids = data.pop('teacher_ids', None)
     if teacher_ids is not None:
-        course.teachers = [get_user(user_id) for user_id
+        course_db.teachers = [get_user(user_id) for user_id
                            in teacher_ids]
     new_landing_info = data.pop('landing_info', None)
     if new_landing_info is not None:
         land_info = {}
-        if course.landing_info:
-            land_info = dict(course.landing_info)
+        if course_db.landing_info:
+            land_info = dict(course_db.landing_info)
         land_info.update(new_landing_info)
-        course.landing_info = land_info
+        course_db.landing_info = land_info
+    #  FIXME
+    patch_products(data.pop('course_products', None),
+                   course_db.course_products, 'course_product_id')
+    patch_products(data.pop('service_products', None),
+                   course_db.service_products, 'service_product_id')
+
     for field, value in data.items():
         try:
-            setattr(course, field, value)
+            setattr(course_db, field, value)
         except TypeError:
-            print(course, field, value)
+            print(course_db, field, value)
             raise
 
     for video_data in videos:
         video = get_video_by_id(video_data.pop('video_id'))
-        if video.course_id != course.course_id:
+        if video.course_id != course_db.course_id:
             return None, 400, 'Incorrect video id for course'
         hw = video_data.pop('homework', None)
         if hw is not None:
@@ -344,7 +350,20 @@ def patch_course(course_id, data):
 
     session.commit()
 
-    return course, 200, None
+    return course_db, 200, None
+
+
+def patch_products(products, products_db, field):
+    if products is not None:
+        course_products_ids = set([x[field] for x in products])
+        for pr_db in products_db:
+            if pr_db.course_product_id in course_products_ids:
+                edited_product = next(
+                    products.filter(lambda x:
+                                           x['course_product_id'] == getattr(pr_db, field)))
+                for f, value in edited_product:
+                    if f != field:
+                        setattr(pr_db, f, value)
 
 
 def create_registration_hash_and_send_email(data):
