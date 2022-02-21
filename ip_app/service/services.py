@@ -360,7 +360,7 @@ def patch_products(products, products_db, field):
             if pr_db.course_product_id in course_products_ids:
                 edited_product = next(
                     filter(lambda x: x['course_product_id'] == getattr(pr_db, field), products))
-                for f, value in edited_product:
+                for f, value in edited_product.items():
                     if f != field:
                         setattr(pr_db, f, value)
 
