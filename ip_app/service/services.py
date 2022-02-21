@@ -321,7 +321,11 @@ def patch_course(course_id, data):
         land_info.update(new_landing_info)
         course.landing_info = land_info
     for field, value in data.items():
-        setattr(course, field, value)
+        try:
+            setattr(course, field, value)
+        except TypeError:
+            print(course, field, value)
+            raise
 
     for video_data in videos:
         video = get_video_by_id(video_data.pop('video_id'))
