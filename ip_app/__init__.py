@@ -10,13 +10,14 @@ from flask_executor import Executor
 from flask_cors import CORS
 
 from config import Config
+import pathlib
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
 logger = app.logger
 logger.setLevel(app.config['LOGGER_LEVEL'])
-
 naming_convention = {
     "ix": 'ix_%(column_0_label)s',
     "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -48,6 +49,7 @@ migrate = Migrate(app, db)
 
 scheduler = APScheduler(app=app)
 executor = Executor(app)
+file_dir = pathlib.Path(__file__).parent.absolute()
 
 from .models import *
 from .service import *

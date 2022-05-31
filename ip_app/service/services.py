@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from uuid import uuid4
 
 from sqlalchemy import or_, and_
-
 from ip_app import session, db, Statistics, Notifications
 from ip_app.models import User, CourseApplication, Course, Access, Video, CourseProduct, ServiceProduct, \
     UserRegistration, OrderCourseProductItem, OrderServiceProductItem, Order, VideoProgressTracking, \
@@ -77,8 +76,11 @@ def delete_user(user_id):
     session.commit()
 
 
-def get_course_applications_filters(args):
-    return ()
+def get_course_applications_filters(current_user):
+    if current_user.role == 'ADMIN':
+        return ()
+    else:
+        return (CourseApplication.course_id.in_([x.course_id for x in current_user.taught_courses]), )
 
 
 def generate_token():

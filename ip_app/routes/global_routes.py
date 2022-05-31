@@ -1,7 +1,7 @@
 from functools import wraps
 
 from flask_restplus import Resource, inputs
-from ip_app import api, check_last_seen, add_progress_percent, get_chat_items_by_chat_id
+from ip_app import api, check_last_seen, add_progress_percent, get_chat_items_by_chat_id, ImageLoader, FlaskAdapter
 from ip_app.models import User, CourseApplication, Course
 from flask import request, g
 from ip_app.constants import roles
@@ -208,7 +208,7 @@ class CourseApplicationCollection(Resource, PaginationMixin):
     @api.marshal_list_with(course_application_model)
     @api.expect(applications_parser)
     @api.response(403, 'Access denied')
-    @role_required(0)
+    @role_required(1)
     def get(self):
         """
         Get course applications
@@ -216,7 +216,7 @@ class CourseApplicationCollection(Resource, PaginationMixin):
         args = applications_parser.parse_args()
         result = self.paginate(args,
                                default_order_clauses=(CourseApplication.application_date.desc(),),
-                               extra_filters=services.get_course_applications_filters(args))
+                               extra_filters=services.get_course_applications_filters(g.current_user))
         return result
 
 
@@ -382,7 +382,12 @@ class CourseCollection(Resource, PaginationMixin):
         """
         Create a new course
         """
-        course, code, reason = services.create_new_course(request.get_json())
+        image_path = ImageLoader.upload(FlaskAdapter(request), "/course_avatars/", options={
+            'fieldname': 'course_pic'
+        })
+        data = request.get_json()
+        data['course_pic_url'] = image_path
+        course, code, reason = services.create_new_course(data)
         if course is None:
             api.abort(code, reason)
         return course
