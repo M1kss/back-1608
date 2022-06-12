@@ -385,7 +385,7 @@ class CourseCollection(Resource, PaginationMixin):
     BaseEntity = Course
 
     @api.marshal_list_with(course_landing_model)
-    @api.expect(pagination_parser)
+    #@api.expect(pagination_parser)
     @api.response(403, 'Access denied')
     @role_required()
     def get(self):
