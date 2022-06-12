@@ -358,7 +358,7 @@ class CurrentUser(Resource):
 
 
 course_pic_parser = api.parser()
-course_pic_parser.add_argument('course_pic', type=FileStorage, location='files')
+course_pic_parser.add_argument('course_pic', location='files')
 
 
 @crs_nsp.route('')
