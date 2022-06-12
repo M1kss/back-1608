@@ -6,9 +6,9 @@ import copy
 import os
 
 from werkzeug.utils import secure_filename
-import run
 
 # File saver
+import ip_app
 
 
 class FileLoader:
@@ -203,7 +203,7 @@ class Utils(object):
         Return:
          string: serverPath
         """
-        return run.app.config['UPLOAD_FOLDER']
+        return ip_app.app.config['UPLOAD_FOLDER']
 
     @staticmethod
     def isValid(validation, filePath, mimetype):
