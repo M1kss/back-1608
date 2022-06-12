@@ -230,7 +230,7 @@ course_full_model = api.clone('Course admin model', course_landing_model, {
 course_post_model = api.model('Course post model', {
     'title': fields.String(required=True),
     'description': fields.String,
-    'course_pic': fields.request.files,
+    'course_pic': fields.Raw,
     'author_name': fields.String(required=True),
     'teacher_ids': fields.List(fields.Integer, required=True, min_items=1),
     'landing_info': fields.Nested(landing_info_model, required=True),

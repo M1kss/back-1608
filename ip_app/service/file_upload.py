@@ -5,9 +5,10 @@ import hmac
 import copy
 import os
 
+from werkzeug.utils import secure_filename
+import run
 
 # File saver
-import app
 
 
 class FileLoader:
@@ -42,7 +43,7 @@ class FileLoader:
 
         # Generate new random name.
         sha1 = hashlib.sha1(str(time.time()).encode("utf-8")).hexdigest()
-        routeFilename = os.path.join(fileRoute, sha1 + extension)
+        routeFilename = secure_filename(os.path.join(fileRoute, sha1 + extension))
 
         fullNamePath = os.path.join(Utils.getServerPath(), routeFilename)
 
@@ -202,7 +203,7 @@ class Utils(object):
         Return:
          string: serverPath
         """
-        return app.app.config['UPLOAD_FOLDER']
+        return run.app.config['UPLOAD_FOLDER']
 
     @staticmethod
     def isValid(validation, filePath, mimetype):
