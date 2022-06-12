@@ -1,6 +1,6 @@
 from functools import wraps
 
-from flask_restplus import Resource, inputs
+from flask_restx import Resource, inputs
 from werkzeug.datastructures import FileStorage
 
 from ip_app import api, check_last_seen, add_progress_percent, get_chat_items_by_chat_id, ImageLoader, FlaskAdapter
@@ -64,6 +64,23 @@ def get_token():
     if len(parsed_words) != 2 or parsed_words[0] != 'Bearer':
         return None
     return parsed_words[1]
+
+
+def build_parser(schema):
+    parser = api.parser()
+    for prop, conf in schema.__schema__.get('properties', {}).items():
+        conf_type = conf.get('type')
+        if conf_type == 'string' and conf.get('format') == 'date-time':
+            parser.add_argument(prop, type=inputs.datetime_from_iso8601)
+        elif conf_type == 'integer':
+            parser.add_argument(prop, type=int)
+        elif conf_type == 'boolean':
+            parser.add_argument(prop, type=bool, default=False)
+        elif conf_type == 'array':
+            parser.add_argument(prop, default=list, action='append')
+        else:
+            parser.add_argument(prop)
+    return parser
 
 
 @aut_nsp.route('')
@@ -358,8 +375,7 @@ class CurrentUser(Resource):
 
 
 course_pic_parser = api.parser()
-course_pic_parser.add_argument('course_pic', location='files')
-print(course_full_model.__dict__)
+course_pic_parser.add_argument('course_pic', location='files', type=FileStorage)
 
 @crs_nsp.route('')
 class CourseCollection(Resource, PaginationMixin):
@@ -378,7 +394,7 @@ class CourseCollection(Resource, PaginationMixin):
         """
         return self.paginate(pagination_parser.parse_args())
 
-    @api.expect(course_post_model)
+    @api.expect(course_pic_parser, course_post_model)
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Author not found')
@@ -414,7 +430,7 @@ class CourseItem(Resource):
         """
         return services.get_course_by_id(course_id)
 
-    @api.expect(course_patch_model, course_pic_parser)
+    @api.expect(course_pic_parser)
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Course does not exist')

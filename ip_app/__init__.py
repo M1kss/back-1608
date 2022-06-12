@@ -1,6 +1,6 @@
 from flask import Flask, Blueprint
 from flask_migrate import Migrate
-from flask_restplus import Api
+from flask_restx import Api
 
 from flask_sqlalchemy import SQLAlchemy
 from jsonschema import FormatChecker
