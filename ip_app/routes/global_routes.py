@@ -359,7 +359,7 @@ class CurrentUser(Resource):
 
 course_pic_parser = api.parser()
 course_pic_parser.add_argument('course_pic', location='files')
-
+print(course_full_model.__dict__)
 
 @crs_nsp.route('')
 class CourseCollection(Resource, PaginationMixin):
