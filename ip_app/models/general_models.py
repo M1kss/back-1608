@@ -45,7 +45,8 @@ class Course(db.Model):
     teachers = db.relationship(
         User,
         secondary='course_teachers',
-        backref='taught_courses'
+        backref='taught_courses',
+        overlaps="taught_courses,teachers"
     )
 
 
