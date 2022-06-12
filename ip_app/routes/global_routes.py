@@ -378,7 +378,7 @@ class CourseCollection(Resource, PaginationMixin):
         """
         return self.paginate(pagination_parser.parse_args())
 
-    @api.expect(course_post_model, course_pic_parser)
+    @api.expect(course_post_model)
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Author not found')
