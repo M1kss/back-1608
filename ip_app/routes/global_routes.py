@@ -1,6 +1,8 @@
 from functools import wraps
 
 from flask_restplus import Resource, inputs
+from werkzeug.datastructures import FileStorage
+
 from ip_app import api, check_last_seen, add_progress_percent, get_chat_items_by_chat_id, ImageLoader, FlaskAdapter
 from ip_app.models import User, CourseApplication, Course
 from flask import request, g
@@ -353,6 +355,10 @@ class CurrentUser(Resource):
         """
         services.delete_user(g.current_user.user_id)
         return 200, {}
+
+
+course_pic_parser = api.parser()
+course_pic_parser.add_argument('course_pic', type=FileStorage, help='Course image')
 
 
 @crs_nsp.route('')
