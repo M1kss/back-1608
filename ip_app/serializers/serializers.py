@@ -217,7 +217,7 @@ landing_info_model = api.model('Landing info model', {
 })
 
 course_landing_model = api.clone('Course landing model', course_base_model, {
-    'landing_info': fields.Nested(landing_info_model, skip_none=True),
+    #'landing_info': fields.Nested(landing_info_model, skip_none=True),
     'course_products': fields.List(fields.Nested(course_product_model)),
     'service_products': fields.List(fields.Nested(service_product_model)),
 })

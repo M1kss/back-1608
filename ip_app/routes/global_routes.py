@@ -430,7 +430,7 @@ class CourseItem(Resource):
         """
         return services.get_course_by_id(course_id)
 
-    @api.expect(course_pic_parser)
+    @api.expect(course_pic_parser, course_patch_model)
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Course does not exist')
