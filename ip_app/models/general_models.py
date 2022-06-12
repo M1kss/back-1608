@@ -46,7 +46,8 @@ class Course(db.Model):
         User,
         secondary='course_teachers',
         backref='taught_courses',
-        overlaps="taught_courses,teachers"
+        overlaps="taught_courses,teachers",
+        viewonly=True
     )
 
 
