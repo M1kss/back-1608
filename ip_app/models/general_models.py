@@ -32,12 +32,6 @@ class User(db.Model):
     birth_date = db.Column(db.Date)
     password_hash = db.Column(db.String(100))
 
-    taught_courses = db.relationship(
-        'courses',
-        secondary='course_teachers',
-        back_populates='taught_courses'
-    )
-
 
 class Course(db.Model):
     __tablename__ = 'courses'
@@ -51,7 +45,7 @@ class Course(db.Model):
     teachers = db.relationship(
         User,
         secondary='course_teachers',
-        back_populates='taught_courses'
+        backref='taught_courses'
     )
 
 
