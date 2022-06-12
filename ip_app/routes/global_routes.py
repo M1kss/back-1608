@@ -378,7 +378,7 @@ class CourseCollection(Resource, PaginationMixin):
         """
         return self.paginate(pagination_parser.parse_args())
 
-    @api.expect(course_post_model, pagination_parser)
+    @api.expect(course_post_model, course_pic_parser)
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Author not found')
@@ -414,7 +414,7 @@ class CourseItem(Resource):
         """
         return services.get_course_by_id(course_id)
 
-    @api.expect(course_patch_model)
+    @api.expect(course_patch_model, course_pic_parser)
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Course does not exist')
