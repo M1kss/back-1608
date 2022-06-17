@@ -302,7 +302,7 @@ class RegistrationInit(Resource):
 
 
 registration_user_parser = api.parser()
-registration_user_parser.add_argument('hash', help='Unique registration user hash')
+registration_user_parser.add_argument('hash', help='Unique registration user hash', location='args')
 
 
 # TODO API for sending email with hash
