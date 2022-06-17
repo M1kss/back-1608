@@ -33,22 +33,6 @@ class User(db.Model):
     password_hash = db.Column(db.String(100))
 
 
-class Course(db.Model):
-    __tablename__ = 'courses'
-    course_id = db.Column(INTEGER(unsigned=True), primary_key=True)
-    title = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.String(250))
-    course_pic_url = db.Column(db.String(100))
-    author_name = db.Column(db.String(30), nullable=True)
-    landing_info = db.Column(db.JSON, default={})
-
-    teachers = db.relationship(
-        User.__table__,
-        secondary='course_teachers',
-        backref='taught_courses',
-    )
-
-
 class CourseTeacherCorrespondence(db.Model):
     __tablename__ = 'course_teachers'
     __table_args__ = (
@@ -66,10 +50,21 @@ class CourseTeacherCorrespondence(db.Model):
                                          ondelete="CASCADE"),
                            nullable=False)
 
-    teacher = db.relationship(User, backref=db.backref('course_teachers',
-                                                       cascade="all, delete"))
-    course = db.relationship(Course, backref=db.backref('course_teachers',
-                                                        cascade="all, delete"))
+
+class Course(db.Model):
+    __tablename__ = 'courses'
+    course_id = db.Column(INTEGER(unsigned=True), primary_key=True)
+    title = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(250))
+    course_pic_url = db.Column(db.String(100))
+    author_name = db.Column(db.String(30), nullable=True)
+    landing_info = db.Column(db.JSON, default={})
+
+    teachers = db.relationship(
+        User,
+        secondary=CourseTeacherCorrespondence.__table__,
+        backref='taught_courses',
+    )
 
 
 class Order(db.Model):
