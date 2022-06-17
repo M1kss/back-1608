@@ -1,6 +1,6 @@
 from functools import wraps
 
-from flask_restplus import Resource, inputs
+from flask_restx import Resource, inputs
 from ip_app import api, check_last_seen, add_progress_percent, get_chat_items_by_chat_id
 from ip_app.models import User, CourseApplication, Course
 from flask import request, g

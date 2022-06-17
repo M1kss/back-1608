@@ -1,4 +1,4 @@
-from flask_restplus import fields
+from flask_restx import fields
 from ip_app import api
 from ip_app.constants import roles, user_statuses, course_statuses, video_statuses, EMAIL_REGEX, PHONE_REGEX, \
     sex_choices, hw_statuses, sender_choices
