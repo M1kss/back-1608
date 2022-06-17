@@ -28,9 +28,9 @@ stc_nsp = api.namespace('Statistics', path='/statistics',
 otr_nsp = api.namespace('Other', path='/other', description='Other operations')
 
 pagination_parser = api.parser()
-pagination_parser.add_argument('page', type=inputs.positive, help='Page number', default=1)
-pagination_parser.add_argument('size', type=inputs.natural, help='Items per page or 0 for all items', default=0)
-pagination_parser.add_argument('offset', type=inputs.natural, help='Skip first N items', default=0)
+pagination_parser.add_argument('page', type=inputs.positive, help='Page number', default=1, location='args')
+pagination_parser.add_argument('size', type=inputs.natural, help='Items per page or 0 for all items', default=0, location='args')
+pagination_parser.add_argument('offset', type=inputs.natural, help='Skip first N items', default=0, location='args')
 
 
 def role_required(role_id=len(roles) - 1):
