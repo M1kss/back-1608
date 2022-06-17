@@ -85,7 +85,7 @@ course_base_model = api.model('Course base model', {
     'course_id': fields.Integer(min=1, readonly=True),
     'title': fields.String,
     'description': fields.String,
-    'course_pic': fields.Url,
+    'course_pic': fields.String,
     'author_name': fields.String,
 
 })
@@ -217,7 +217,7 @@ landing_info_model = api.model('Landing info model', {
 })
 
 course_landing_model = api.clone('Course landing model', course_base_model, {
-    #'landing_info': fields.Nested(landing_info_model, skip_none=True),
+    'landing_info': fields.Nested(landing_info_model, skip_none=True),
     'course_products': fields.List(fields.Nested(course_product_model)),
     'service_products': fields.List(fields.Nested(service_product_model)),
 })
@@ -232,7 +232,7 @@ course_post_model = api.model('Course post model', {
     'description': fields.String,
     'author_name': fields.String(required=True),
     'teacher_ids': fields.List(fields.Integer, required=True, min_items=1),
-    #'landing_info': fields.Nested(landing_info_model, required=True),
+    'landing_info': fields.Nested(landing_info_model, required=True),
     'course_products': fields.List(fields.Nested(course_product_model), required=True, min_items=1),
     'service_products': fields.List(fields.Nested(service_product_model), default=[]),
     'videos': fields.List(fields.Nested(video_admin_model), default=[])
