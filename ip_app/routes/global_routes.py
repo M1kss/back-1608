@@ -152,7 +152,7 @@ class ActiveUserCollection(Resource, PaginationMixin):
 
 
 teachers_parser = pagination_parser.copy()
-teachers_parser.add_argument('courses', help='Comma separated course ids', default=None)
+teachers_parser.add_argument('courses', help='Comma separated course ids', default=None, location='args')
 
 
 @usr_nsp.route('/teachers')
