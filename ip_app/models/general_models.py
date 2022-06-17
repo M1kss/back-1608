@@ -43,7 +43,7 @@ class Course(db.Model):
     landing_info = db.Column(db.JSON, default={})
 
     teachers = db.relationship(
-        User,
+        'User',
         secondary='course_teachers',
         backref='taught_courses',
     )
