@@ -48,7 +48,6 @@ class FileLoader:
         fullNamePath = os.path.join(Utils.getServerPath(), routeFilename)
 
         req.saveFile(options["fieldname"], fullNamePath)
-        print(fullNamePath)
         # Check validation.
         if "validation" in options:
             if not Utils.isValid(options["validation"], fullNamePath, req.getMimetype(options["fieldname"])):
@@ -61,7 +60,7 @@ class FileLoader:
                 img.save(filename=fullNamePath)
 
         # build and send response.
-        return fullNamePath
+        return {'file': fullNamePath}
 
     @staticmethod
     def delete(src):

@@ -756,7 +756,7 @@ class Files(Resource):
         """
         Get sales statistics
         """
-        file_path = ImageLoader.upload(FlaskAdapter(request), "/course_avatars/", options={
+        file_path = ImageLoader.upload(FlaskAdapter(request), "img", options={
             'fieldname': 'file'
         })
         return file_path
