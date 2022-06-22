@@ -752,9 +752,10 @@ class Files(Resource):
     """
     @api.expect(file_parser)
     @api.marshal_with(file_model)
+    @role_required()
     def post(self):
         """
-        Get sales statistics
+        Save file
         """
         file_path = ImageLoader.upload(FlaskAdapter(request), "img", options={
             'fieldname': 'file'
