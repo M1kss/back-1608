@@ -5,7 +5,7 @@ from werkzeug.datastructures import FileStorage
 
 from ip_app import api, check_last_seen, add_progress_percent, get_chat_items_by_chat_id, ImageLoader, FlaskAdapter
 from ip_app.models import User, CourseApplication, Course
-from flask import request, g
+from flask import request, g, send_file
 from ip_app.constants import roles
 from ip_app.service import services
 from ip_app.serializers.serializers import user_model_with_token, user_model_base, credentials_model, \
@@ -765,11 +765,15 @@ class Files(Resource):
         return file_path
 
 
-# @fls_nsp.route('/<str:file_id>')
-# class FilesServer(Resource):
-#
-#     def get(self, file_id):
-#         """
-#         Get file by id
-#         """
-#         return ImageLoader
+@fls_nsp.route('/<str:file_id>')
+class FilesServer(Resource):
+
+    def get(self, file_id):
+        """
+        Get file by id
+        """
+        return send_file(
+            file_id,
+            cache_timeout=0,
+            as_attachment=True
+    )

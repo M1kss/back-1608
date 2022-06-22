@@ -20,6 +20,11 @@ class FileLoader:
         }
     }
 
+    @staticmethod
+    def get_file(file_id):
+        return os.path.join(Utils.getServerPath(), file_id)
+
+
     @classmethod
     def upload(cls, req, fileRoute, options=None):
         """
@@ -45,7 +50,7 @@ class FileLoader:
         sha1 = hashlib.sha1(str(time.time()).encode("utf-8")).hexdigest()
         routeFilename = secure_filename(os.path.join(fileRoute, sha1 + extension))
 
-        fullNamePath = os.path.join(Utils.getServerPath(), routeFilename)
+        fullNamePath = cls.get_file(routeFilename)
 
         req.saveFile(options["fieldname"], fullNamePath)
         # Check validation.
