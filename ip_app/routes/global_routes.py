@@ -410,6 +410,7 @@ class CourseCollection(Resource, PaginationMixin):
         })
         data = request.form.to_dict()
         data['course_pic_url'] = image_path
+        print(data)
         course, code, reason = services.create_new_course(data)
         if course is None:
             api.abort(code, reason)
