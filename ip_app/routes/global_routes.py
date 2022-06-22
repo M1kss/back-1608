@@ -745,6 +745,7 @@ class Statistics(Resource):
 file_parser = api.parser()
 file_parser.add_argument('file', type=FileStorage, location='files')
 
+
 @fls_nsp.route('')
 class Files(Resource):
     """
@@ -752,6 +753,7 @@ class Files(Resource):
     """
     @api.expect(file_parser)
     @api.marshal_with(file_model)
+    @api.response(403, 'Access denied')
     @role_required()
     def post(self):
         """
