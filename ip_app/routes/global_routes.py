@@ -773,7 +773,7 @@ class FilesServer(Resource):
         Get file by id
         """
         return send_file(
-            file_id,
+            ImageLoader.get_file(file_id),
             cache_timeout=0,
             as_attachment=True
     )
