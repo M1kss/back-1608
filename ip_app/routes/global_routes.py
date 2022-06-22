@@ -762,11 +762,11 @@ class Files(Resource):
         return file_path
 
 
-@fls_nsp.route('/<str:file_id>')
-class FilesServer(Resource):
-
-    def get(self, file_id):
-        """
-        Get file by id
-        """
-        return ImageLoader
+# @fls_nsp.route('/<str:file_id>')
+# class FilesServer(Resource):
+#
+#     def get(self, file_id):
+#         """
+#         Get file by id
+#         """
+#         return ImageLoader
