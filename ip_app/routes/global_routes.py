@@ -14,7 +14,7 @@ from ip_app.serializers.serializers import user_model_with_token, user_model_bas
     contacts_info_model, legal_info_model, statistics_model, course_application_model, first_step_registration_model, \
     user_model_patch, course_patch_model, video_progress_model, chat_line_model, chat_with_teacher_read_model, \
     chat_teacher_model, user_model_with_course, chat_thread_model, teacher_model_with_courses_count, \
-    teacher_model_with_courses, notifications_model
+    teacher_model_with_courses, notifications_model, file_model
 from ip_app.utils import PaginationMixin
 
 aut_nsp = api.namespace('Authentication', path='/auth', description='Operations related to authentication')
@@ -25,6 +25,7 @@ cht_nsp = api.namespace('Homework', path='/chat', description='Operations relate
 pmt_nsp = api.namespace('Payments', path='/payments', description='Operations related to payments')
 stc_nsp = api.namespace('Statistics', path='/statistics',
                         description='Operations related to sales and users statistics')
+fls_nsp = api.namespace('Files', path='/files', description='Operations related to files')
 otr_nsp = api.namespace('Other', path='/other', description='Other operations')
 
 pagination_parser = api.parser()
@@ -394,7 +395,7 @@ class CourseCollection(Resource, PaginationMixin):
         """
         return self.paginate(pagination_parser.parse_args())
 
-    @api.expect(course_post_model, course_pic_parser)
+    @api.expect(course_post_model)
     @api.representation('multipart/form-data')
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
@@ -405,12 +406,7 @@ class CourseCollection(Resource, PaginationMixin):
         """
         Create a new course
         """
-        image_path = ImageLoader.upload(FlaskAdapter(request), "/course_avatars/", options={
-            'fieldname': 'course_pic'
-        })
-        data = request.form.to_dict()
-        data['course_pic_url'] = image_path
-        print(data)
+        data = request.get_json()
         course, code, reason = services.create_new_course(data)
         if course is None:
             api.abort(code, reason)
@@ -744,3 +740,33 @@ class Statistics(Resource):
         Get sales statistics
         """
         return services.get_statistics()
+
+
+file_parser = api.parser()
+file_parser.add_argument('file', type=FileStorage, location='files')
+
+@fls_nsp.route('')
+class Files(Resource):
+    """
+    Saving files
+    """
+    @api.expect(file_parser)
+    @api.marshal_with(file_model)
+    def post(self):
+        """
+        Get sales statistics
+        """
+        file_path = ImageLoader.upload(FlaskAdapter(request), "/course_avatars/", options={
+            'fieldname': 'file'
+        })
+        return file_path
+
+
+@fls_nsp.route('/<str:file_id>')
+class FilesServer(Resource):
+
+    def get(self, file_id):
+        """
+        Get file by id
+        """
+        return ImageLoader

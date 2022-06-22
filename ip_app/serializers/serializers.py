@@ -85,7 +85,7 @@ course_base_model = api.model('Course base model', {
     'course_id': fields.Integer(min=1, readonly=True),
     'title': fields.String,
     'description': fields.String,
-    'course_pic': fields.String,
+    'course_pic_url': fields.String,
     'author_name': fields.String,
 
 })
@@ -340,4 +340,8 @@ chat_thread_model = api.model('Chat thread model', {
     'chat_lines': fields.List(fields.Nested(chat_line_model)),
     'hw_status': fields.String(enum=hw_statuses),
     'video': fields.Nested(video_base_model)
+})
+
+file_model = api.model('File model', {
+    'file': fields.String
 })
