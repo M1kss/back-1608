@@ -394,7 +394,7 @@ class CourseCollection(Resource, PaginationMixin):
         """
         return self.paginate(pagination_parser.parse_args())
 
-    @api.expect(course_pic_parser, course_post_model)
+    @api.expect(course_post_model, course_pic_parser)
     @api.representation('multipart/form-data')
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
