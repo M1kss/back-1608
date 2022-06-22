@@ -395,6 +395,7 @@ class CourseCollection(Resource, PaginationMixin):
         return self.paginate(pagination_parser.parse_args())
 
     @api.expect(course_pic_parser, course_post_model)
+    @api.representation('multipart/form-data')
     @api.marshal_with(course_full_model)
     @api.response(403, 'Access denied')
     @api.response(404, 'Author not found')
@@ -407,7 +408,7 @@ class CourseCollection(Resource, PaginationMixin):
         image_path = ImageLoader.upload(FlaskAdapter(request), "/course_avatars/", options={
             'fieldname': 'course_pic'
         })
-        data = request.get_json()
+        data = request.form.to_dict()
         data['course_pic_url'] = image_path
         course, code, reason = services.create_new_course(data)
         if course is None:
