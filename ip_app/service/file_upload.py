@@ -61,7 +61,7 @@ class FileLoader:
                 img.save(filename=fullNamePath)
 
         # build and send response.
-        return routeFilename
+        return fullNamePath
 
     @staticmethod
     def delete(src):
