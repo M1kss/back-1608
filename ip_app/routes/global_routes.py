@@ -765,8 +765,8 @@ class Files(Resource):
         return file_path
 
 
-@fls_nsp.route('/<str:file_id>')
-class FilesServer(Resource):
+@fls_nsp.route('/<file_id>')
+class FilesGetter(Resource):
 
     def get(self, file_id):
         """
